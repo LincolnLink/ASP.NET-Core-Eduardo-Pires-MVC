@@ -167,36 +167,111 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
 
 <blockquete> https://localhost:44367/Gestao/Home/Index/10/?categorias=teste <blockquete>
 
+
+# Implementando rotas inteligentes (rotas de atributos)
+
+- Comentei as rotas criadas, e deixei a padrão.
+
+- Tratabalhando com rotas na controller 
+
+- Metadados "[Routes()]" que renomeia controllers e actions.
+
+<blockquete>
+
+    [Route("cliente")]
+    public class HomeController : Controller
+    {
+        private readonly ILogger<HomeController> _logger;
+
+        public HomeController(ILogger<HomeController> logger)
+        {
+            _logger = logger;
+        }
+
+        [Route("inicio")]
+        public IActionResult Index(string id, string categorias)
+        {
+            return View();
+        }
+    }
+<blockquete>
+
+- Com isso o caminho para acessar a pagina deve ser 
+
+<blockquete> https://localhost:44367/cliente/inicio <blockquete>
+
+- Pode passar parametros usando essas rotas de atributos
+
+- Assim é definido como a rota recebe parametro e passa para o método, sempre use o mesmo nome dos parametros.
+
+<blockquete>
+
+    [Route("")]
+    [Route("inicio")]        
+    [Route("inicio/{id}/{categorias?}")]
+    public IActionResult Index(string id, string categorias)
+    {
+        return View();
+    }
+
+<blockquete>
+
+- Podemos definir o tipo do parametro
+
+# sobreCarga de rotas
+
+- Pode por dois nomes para definir a mesma rota
+
+<blockquete>
+
+    [Route("privacidade")]
+    [Route("politica-privacidade")]
+    public IActionResult Privacy()
+    {
+        return View("Privacy");
+    }
+
+<blockquete>
+
+- Definir o tipo de parametro ajuda na segurança !
+
+#  Trabalhando com Action Results
+
+- IActionResults é uma interface que retorna algo de forma asyncrona! 
+
+- O nome da IActionResults é sempre o nome do arquivo(da view).
+
+- Retornando outros formatos
+
+<blockquete>
+
+        [Route("privacidade")]
+        [Route("politica-privacidade")]
+        public IActionResult Privacy()
+        {            
+            return Json("{'nome':'Lincoln'}");
+        }
+
+<blockquete>
+
+- Criando um exemplo de um retorno de download de arquivo
+
+<blockquete>
+
+    [Route("privacidade")]
+    [Route("politica-privacidade")]
+    public IActionResult Privacy()
+    {
+        
+
+        var fileBytes = System.IO.File.ReadAllBytes(@"D:\arquivo.txt");
+        var fileName = "arquivo.txt";
+        return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+
+    }
+<blockquete>
+
 - 
-
-<blockquete>
-
-<blockquete>
-
-
-<blockquete>
-
-<blockquete>
-
-
-<blockquete>
-
-<blockquete>
-
-
-<blockquete>
-
-<blockquete>
-
-
-<blockquete>
-
-<blockquete>
-
-
-<blockquete>
-
-<blockquete>
 
 
 <blockquete>
