@@ -147,25 +147,25 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
 
     });
 
-<blockquete>
+</blockquete>
 
 - Na configuração de rotas no arquivo "StartUp" não precisa difinir o tipo do parametro.
 
 - Testando a passagem de parametro.
 
-<blockquete> ht tp s://localhost:44367/Gestao/Home/Index/10 <blockquete>
+<blockquete> ht tp s://localhost:44367/Gestao/Home/Index/10 </blockquete>
 
 - O método "Index" que retorna o "IActionResult" recebe o valor 10 que foi passado na rota.
 
 - Caso tire o "gestão", o sistema reconhece a outra rota que foi configurada
 
-<blockquete> ht tps: //localhost:44367/Home/Index/10/teste <blockquete>
+<blockquete> ht tps: //localhost:44367/Home/Index/10/teste </blockquete>
 
 - Para forçar parametros que Não ESTÃO CONFIGURADO nas rotas, mas está sendo recebido no action como parametro.
 
 - Devese por a variavel e por o valor:
 
-<blockquete> https://localhost:44367/Gestao/Home/Index/10/?categorias=teste <blockquete>
+<blockquete> https://localhost:44367/Gestao/Home/Index/10/?categorias=teste </blockquete>
 
 
 # Implementando rotas inteligentes (rotas de atributos)
@@ -194,11 +194,11 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
             return View();
         }
     }
-<blockquete>
+</blockquete>
 
 - Com isso o caminho para acessar a pagina deve ser 
 
-<blockquete> https://localhost:44367/cliente/inicio <blockquete>
+<blockquete> https://localhost:44367/cliente/inicio </blockquete>
 
 - Pode passar parametros usando essas rotas de atributos
 
@@ -214,7 +214,7 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
         return View();
     }
 
-<blockquete>
+</blockquete>
 
 - Podemos definir o tipo do parametro
 
@@ -231,7 +231,7 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
         return View("Privacy");
     }
 
-<blockquete>
+</blockquete>
 
 - Definir o tipo de parametro ajuda na segurança !
 
@@ -252,7 +252,7 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
             return Json("{'nome':'Lincoln'}");
         }
 
-<blockquete>
+</blockquete>
 
 - Criando um exemplo de um retorno de download de arquivo
 
@@ -269,16 +269,159 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
         return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
 
     }
+</blockquete>
+
+# Models
+
+- No MVC um modelo é a representação de um objeto do mundo real, na maioria das vezes representa uma tabela de um banco de dados.
+
+- Pode ser um conjunto de informações de diversos objetos em um só, conhecido como DTO, que são ultilizados para diminuir o número de requisições do servidor.
+
+- Com os annotations, vc define o preenchimento correto dos dados, as validações, e o mapeamento.
+
+# Trabalhando com Models
+
+    - Exemplo:
+
+    <blockquete>
+
+        public class Filme
+        {
+            public int Id { get; set; }            
+            public string Titulo { get; set; }
+            public DateTime DataLancamento { get; set; }
+            public string Genero { get; set; }
+            public decimal Valor { get; set; }
+            public int Avalicao { get; set; }
+        }
+    <blockquete>
+
+# Trabalhando com DataAnnotations
+
+ - Required: define que é obrigatorio e pode definir uma mensagem de erro.
+
+ <blockquete>
+    [Required(ErrorMessage = "O campo Título é obrigatório")]
+ </blockquete>
+
+ - stringLength: limites de caracteres
+
+ <blockquete>
+    [StringLength(30,MinimumLength = 3)]
+
+    [StringLength(30,MinimumLength = 3, ErrorMessage = "" +
+            "O maximo de caracteres é 30 e o minimo é 3")]
+ </blockquete>
+
+- DataType: Validando data
+
 <blockquete>
+ [DataType(DataType.DateTime, ErrorMessageResourceName = "Data em formato incorreto")]      
 
-- 
+</blockquete>
 
-
-<blockquete>
-
-<blockquete>
-
+- Display: define o nome que aparece na tela
 
 <blockquete>
+    [Display(Name = "Data de Lançamento")]
+</blockquete>
+
+- RegularExpression: 
+<blockquete>
+    [RegularExpression(@"^[A-Z]+[a-zA-Z\u00C0-\u00FF""'\w-]*$")]
+
+    [RegularExpression(@"^[0-5]*$", ErrorMessage ="Somente números de 0 á 5")]
+       
+</blockquete>
+
+- Range
+<blockquete>
+ [Range(1,1000, ErrorMessage ="Minimo 1 a 1000")]
+</blockquete>
+
+- Column: como vai ser a coluna do banco de dados, dessa propriedade.
+<blockquete>
+[Column(TypeName = "decimal(18,2)")]
+</blockquete>
+
+- Key: informa que é uma chave primaria.
 
 <blockquete>
+[Key]
+</blockquete>
+
+- SobreCargas: pode criar duas validações no mesmo [], mais de uma anotação é passada na mesma linha.
+
+<blockquete>
+[StringLength(30, ErrorMessage = "Maximo 30 caracteres"),
+        Required(ErrorMessage = "O campo Título é obrigatório")]
+</blockquete>
+
+
+# Validação de Modelos
+
+ - SelectMany (método do LinQ): seleciona apenas os erros nesses valores, é uma coleção dentro de uma coleção.
+
+ - Redirecionando rotas com 
+
+<blockquete>
+    return RedirectToAction("Privacy", filme);
+</blockquete>
+
+<blockquete>
+            [Route("")]
+            [Route("inicio")]
+            [Route("inicio/{id:int}/{categorias:guid}")]
+            public IActionResult Index(int id, Guid categorias)
+            {
+                var filme = new Filme
+                {
+                    Titulo = "oi",
+                    DataLancamento = DateTime.Now,
+                    Genero = null,
+                    Avalicao = 10,
+                    Valor = 20000,
+
+                };
+
+                return RedirectToAction("Privacy", filme);
+                //return View();
+            }
+
+            [Route("privacidade")]
+            [Route("politica-privacidade")]
+            public IActionResult Privacy(Filme filme)
+            {
+                if (ModelState.IsValid)
+                {
+
+                }
+
+                foreach (var error in ModelState.Values.SelectMany(m => m.Errors))
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+            }
+</blockquete>
+
+# Apresentando o Razor
+
+- No MVC o motor de renderização das Views chama-se Razor, logo nós temos as Razor Views que são arquivos HTML mesclados com recursos do Razor.
+
+- Os recursos do Razor servem para criar uma experiência mais rica no desenvolvimento de páginas HTMl. Podemos pensar em views fortemente tipadas.
+
+- Omecanismo Razortransforma as Views em arquivos HTML puros para a interpretação do Borwser.
+
+
+# Conhecendo os TagHelpers
+
+- Tag Helpers são os recursos do Razor para geração de HTML. No ASP.NET MVC5 este recurso chama-se HTML Helpers e são muito similares.
+
+- A grande melhoria nos Tag Helpers é a nova sintaxe muito mais agradável e próxima do HTML
+
+<blockquete>
+ < label asp-for="password" class="..">
+    < span asp-validation-for="password">
+</blockquete>
+
+# Views de configuração
