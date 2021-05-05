@@ -425,3 +425,136 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
 </blockquete>
 
 # Views de configuração
+
+- pasta shared: com tem as view, que vai ser usada em toda a aplicação.
+
+- _ViewStart: informa qual pagina sera a principal da palicação.
+
+- _ViewImports: importa component, que será usado de forma global.
+
+- _Layout: pagina mestre.
+
+# Apresentando as Partial Views
+
+- Partial Views são pedaçoes de uma view que possuem dados e que podem ser reaproveitados em N views, assim proporcionando mais reaproveitamento de código.
+
+- As partial views dependem do modelo implementado na view principal, gerando certa limitação no seu uso.
+
+As partial view são muito ultilizadas também para rederizar dinamente parte de uma view através de requisições AJAX.
+
+# Apresentando os View Components
+
+- View Components é um novo recurso do ASP.NET MVC Core, é um poderoso aliado para desenvolvimento de componentes indepentes das views.
+
+- Os view Components possuem processamento serve-side independente e podem realizar ações como obter dados de uma tabela e exibir valores manipulados.
+
+- É uma excelente funcionalidade para componentizar recursos de página como um carrinho de compra por ex. 
+
+# Trabalhando com Views na prática
+
+- Toda view pode eleger uma view de Layout. testa
+
+
+- @RenderBody() : renderiza o conteudo, do layoutMestre.
+
+- @RenderSection("script", requied: false): executa o script antes da dependencia.
+
+# Trabalhando com Partial Views
+
+- Renderizar é ter o processamento antes!
+
+- Cria uma view vazia, chamada "_AvisoGeral".
+
+- Forma atual de chamar um "Parcial view"
+
+<blockquete> < partial name="_AvisoGeral" /> </blockquete>
+
+- Chamada asyncrona
+
+<blockquete> @await Html.PartialAsync("_AvisoGeral") </blockquete>
+
+- Com o bantMark, deve se ver de qual forma renderiza mais rapido.
+
+- Para que serve: Reaproveitar itens de formulario.
+
+# Meu primeiro View Component
+
+ - Criando um View Component
+
+    - Cria a pasta "ViewComponents" para guardar os viewComponent.
+
+    - Cria um classe chamado "CarrinhoViewComponent".
+
+    - herda a classe "ViewComponent".
+
+    - Cria uma propriedade chamada "itensCarrinho", dentro do construtor recebe os dados do banco e bota na variavel.
+
+    - O método é obrigatorio se chama "InvokeAsync".
+
+    - Bote um decoreito com um nome "[ViewComponent(Name = "Carrinho")]".
+
+    <blockquete>
+        [ViewComponent(Name = "Carrinho")]
+        public class CarrinhoViewComponent : ViewComponent
+        {
+            public int itensCarrinho { get; set; }
+
+            public CarrinhoViewComponent()
+            {
+                itensCarrinho = 3;
+            }
+
+            public async Task<IViewComponentResult> InvokeAsync()
+            {
+                return View(itensCarrinho);
+            }
+        } 
+    </blockquete>
+
+ - Criando uma View para o ViewComponent
+
+ - Para que serve:  Criar componentes que trabalham como pequenos pedaços de uma View, porém de forma independente de um modelo específico e que podem realizar processamento, até mesmo consultar dados.
+
+    - Na pasta Shared cria uma pasta chamada "Components", que guarda as view do component.
+
+    - Cria uma pasta "Carrinho" que é o mesmo nome da ViewComponent.
+
+    - Dentro da pasta cria um arquivo chamado "Default.cshtml" que faz o papel da view do component.
+
+    - "@model" com "m" minusculo define.
+
+    - "@Model" com "M" está exibindo o valor.
+
+    <blockquete>
+
+        @model int
+
+        <span class="fade fa-shopping-cart fa-2x"> @Model </span>
+
+    </blockquete>
+
+ - Como chamar o seu viewComponent
+
+    - Usando uma tagHelp chamada "vc"
+
+    <blockquete>
+      <vc:Carrinho></vc:Carrinho>
+    </blockquete>
+
+    - Porm deve configurar essa taghelp no "ViewImport"
+
+    <blockquete>
+        @addTagHelper "*, MinhaDemoMvc"
+    </blockquete>
+
+
+ - View Components e Partial Views são recursos diferentes para atender necessidades diferentes.
+
+ - Os View Components são recursos extras para resolver problemas onde as Views ou Partial Views possuem certas limitações.
+
+# Trabalhando com formulários
+
+ - Crie uma pasta chamada "Filmes" na pasta Views, depois cria uma arquivo chamado "Adicionar".
+
+ - 
+

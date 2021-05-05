@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - MinhaDemoMvc</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    @* <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
@@ -26,6 +28,8 @@
                         </li>
                     </ul>
                 </div>
+
+                <vc:Carrinho></vc:Carrinho>
             </div>
         </nav>
     </header>
@@ -39,6 +43,7 @@
         <div class="container">
             &copy; 2021 - MinhaDemoMvc - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
+        <vc:carrinho></vc:carrinho>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
