@@ -27,18 +27,18 @@ namespace MinhaDemoMvc.Models
         [RegularExpression(@"^[A-Z]+[a-zA-Z\u00C0-\u00FF""'\w-]*$",
         ErrorMessage = "Genero formato errado")]
         [StringLength(30, ErrorMessage = "Maximo 30 caracteres"),
-        Required(ErrorMessage = "O campo Título é obrigatório")]
+        Required(ErrorMessage = "O campo Genero é obrigatório")]
         public string Genero { get; set; }
 
 
-        [Required(ErrorMessage = "O campo valor é obrigatório")]
+        [Required(ErrorMessage = "O campo Valor é obrigatório")]
         [Range(1,1000, ErrorMessage ="Minimo 1 a 1000")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Valor { get; set; }
 
         [Required(ErrorMessage = "O campo Avaliação é obrigatório")]
         [Display(Name = "Avaliação")]
-        [RegularExpression(@"^[0-5]*$", ErrorMessage ="Somente números de 0 á 5")]
+        [RegularExpression(@"^[0-5]*$", ErrorMessage ="Somente valores de 0 á 5")]
         public int Avalicao { get; set; }
 
 

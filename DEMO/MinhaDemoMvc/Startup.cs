@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using MinhaDemoMvc.Data;
 
 namespace MinhaDemoMvc
 {
@@ -24,6 +26,9 @@ namespace MinhaDemoMvc
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+
+            services.AddDbContext<MinhaDemoMvcContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("MinhaDemoMvcContext")));
 
             //Pode configurar uma compatibilidade de vers�o! 
             //services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_2);

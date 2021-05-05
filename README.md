@@ -556,5 +556,144 @@ As partial view são muito ultilizadas também para rederizar dinamente parte de
 
  - Crie uma pasta chamada "Filmes" na pasta Views, depois cria uma arquivo chamado "Adicionar".
 
- - 
+ - ViewData: é aonde fica dados temporarios na memoria, e o titulo é um index, aonde você pode resgatar os valores.
 
+ <blockquete>
+ @{ 
+    ViewData["Title"] = "Adicionar Novo Filme";
+ }
+    
+    <h1>@ViewData["Title"]</h1>
+ </blockquete>
+
+ - Para poder usar o valor deve-se por @, para ele não interpretar como texto e sim como valor.
+
+ - Cria o primeiro formulario.
+
+ <blockquete>
+
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Adicionar">
+
+                <div class="form-group">
+                    <label asp-for="Titulo" class="control-label"></label>
+                    <input asp-for="Titulo" class="form-control" />
+                </div>         
+
+            </form>
+        </div>
+    </div>
+ </blockquete>
+
+ - Cria um controller com nome de "Filmes"
+
+ <blockquete>
+
+    public class Filmes : Controller
+    {
+        [HttpGet]
+        public IActionResult Adicionar()
+        {
+            return View();
+        }
+    }
+ </blockquete>
+
+ - Na view Layout, bota uma referencia da controller Filmes
+
+ <blockquete>
+    < li class="nav-item">
+        < a class="nav-link text-dark" asp-area="" asp-controller="Filmes" asp-action="Adicionar">Filmes</>
+    < /li>
+ </blockquete>
+
+
+# Validações de Formulário
+
+ - Reaproveitando a validação da model.
+
+ - Em cada campo adiciona um span com o codigo asp fazendo referencia ao atributo da model
+
+ <blockquete>
+  < span asp-validation-for="Titulo" class="text-danger"></>
+ </blockquete>
+
+ - Para mostrar um resumo das validações, se usa um validacionSumer
+
+    - ModelOnly: apenas na modelState.
+
+    - All: tanto da modelState , tambem validações antes de subimeter o formulario.
+
+ - É preciso revalidar a modelState, fazendo uma validação manual.
+
+    - Validação antes se submeter para controller, precisa asicionar uma section.
+
+    - Com isso carrega toda regra para validar, usando o jQuery, a mensagem fica em portugues !
+
+    <blockquete>
+                    
+        @section Script{ 
+
+            @{
+                await Html.RenderPartialAsync("_ValidationScriptsParcial");
+             }
+        }
+
+    </blockquete>
+
+
+# Ganhe tempo. Utilize Scaffold
+
+    - cria automaticamente formularios, view e controller
+
+    - add -> controller
+
+        - MVC + antityframework
+
+        - escolhe a model já existente
+
+        - escolha o contexto
+
+        - marca todo os campos
+
+        - ele já cria o nome do controller!
+
+    - Criando uma partialView
+
+        - add view -> partialView, 
+ 
+
+# Criando um projeto MVC sem template
+
+ -
+
+ <blockquete>
+ </blockquete>
+
+ 
+ -
+
+ <blockquete>
+ </blockquete>
+
+
+
+
+
+
+ -
+
+ <blockquete>
+ </blockquete>
+
+ 
+ -
+
+ <blockquete>
+ </blockquete>
+
+ -
+
+ <blockquete>
+ </blockquete>
