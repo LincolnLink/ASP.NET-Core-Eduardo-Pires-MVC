@@ -661,33 +661,143 @@ As partial view são muito ultilizadas também para rederizar dinamente parte de
 
     - Criando uma partialView
 
-        - add view -> partialView, 
+        - add view -> partialView/view
  
 
 # Criando um projeto MVC sem template
 
- -
+    - Cria uma solução em branco
+
+    - Cria uma pasta chamada "src", "test", "tools", "docs" dentro do projeto.
+    
+    - Cria um projeto "ASP.NET Core Web Application" VAZIO!
+
+    - Cria as pastas "Models", "Views" e "Controller".
+
+    - Configurando o MVC no arquivo Startup.
+            
+        <blockquete>
+
+                public void ConfigureServices(IServiceCollection services)
+                {
+                    services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_3_0);
+                }
+        </blockquete>
+
+            - Com isso fica compativel com uma versão especifica do dotnet ou com a ultimaversão
+
+    - Configurando rotas caso seja usada!
+
+        - trocando o  app.run, pelo o app.MVC, no arquivo StartUp(vai da erro, modo antigo)
+
+        - Caso seja necessario configurar rotas.
+
+        - Link para ajudar a configurar de forma nova.
+
+        https://stackoverflow.com/questions/57684093/using-usemvc-to-configure-mvc-is-not-supported-while-using-endpoint-routing
+
+
 
  <blockquete>
- </blockquete>
+            // MODELO NOVO
+            app.UseRouting();
 
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapGet("/", async context =>
+                {
+                    await context.Response.WriteAsync("Hello World!");
+                });
+            });
+
+            // MODELO ANTIGO VAI DA ERRO!
+            // app.UseMvc(routes =>
+            // {
+            //     // routes.MapRoute(
+            //     //     name: "default",
+            //     //     template: "{controller=Home}/{action=Index}/{id?}");
+
+            //     routes.MapRoute("default","{controller=Home}/{action=Index}/{id?}");
+                
+            // });
+
+            // app.UseMvc();
+
+  
+ </blockquete>
  
- -
+    - Cria uma controller do zero na pasta controllers
+
+    - cria uma view na pasta com nome da controller dentro da view.
+    
+ # Ferramentas de Front-End
+
+    - Cria uma pasta chamada Shared, depois uma view chamada "_Layout".
+
+    - Chama o "@RenderBody()" na tag <main> da view "_Layout", ele é responsavel pelo conteudo.
+
+    - Cria um arquivo chamado "_ViewStart" e define o layoutu padrão nela que vai ser uma outra view chamada "_Layout".
 
  <blockquete>
+        @{
+        Layout = "_Layout";
+        }
  </blockquete>
 
+### Fazendo o TagHelpers funcionar.
 
-
-
-
-
- -
+    - Cria o arquivo "_ViewImport" dolado da "_ViewSatrt", e adiciona o codigo.
 
  <blockquete>
+
+    @using Dev.UI.Site
+    @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
  </blockquete>
 
+    - Se cria esse codigo para os TagHelpers poder ser reconhecido.
+
+### implementando o bootstrap
+
+    - Cria uma pasta chamada "wwwroot", adiciona na aplicação usado a opção "Biblioteca ao lado do cliente".
+
+    - Com a opção cdnJS, escolhe as libs.
+
+    - Depois bota a referencia dos arquivos no view "_Layoutcshtml"
+
+### decidindo se o arquivo carrega
+
+ - A tAG "environment" define oque vai carregar em produção ou não.
  
+ <blockquete>
+
+    < environment include="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/lib/font-awesome/css/fontawesome.css" />
+    < /environment>
+    < environment exclude="Development">
+        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute"
+              crossorigin="anonymous"
+              integrity="sha256-eSi1q2PG6J7yAaWMcrr5GrtohYChqibrV7PBE=" />
+    < /environment> 
+
+ </blockquete>
+ 
+ - asp-fallback-href: caso não carrega o cdn ele vai carregar o arquivo indicado pelo " asp-fallback-href".
+
+ - integrity: codigo que autentica o arquivo cdn.
+
+ - crossorigin: fala que é o mesmo arquivo.
+
+ - "@ViewData["Title"]" é o mesmo que "@ViewBag["Title"]"
+
+
+# Bundling & Minification
+
+ -
+
  -
 
  <blockquete>
