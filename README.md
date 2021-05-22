@@ -796,14 +796,185 @@ As partial view são muito ultilizadas também para rederizar dinamente parte de
 
 # Bundling & Minification
 
- -
+ - cria um arquivo e pasta css e js, dentro da pasta wwwroot, para personalização propria;
 
- -
+ - Cria um arquivo "bundlingConfig" no projeto.
+ 
+ <blockquete>
+    {
+    "outputFileName": "wwwroot/css/site_bundle.min.css",
+    "inputFile": [
+        "wwwroot/lib/bootstrap/css/bootstrap.css",
+        "wwwroot/css/site.css"
+    ]
+
+    },
+    {
+    "outputFileName": "wwwroot/js/site_bundle.min.js",
+    "inputFile": [
+        "wwwroot/lib/jquery/jquery.js",
+        "wwwroot/js/site.js"
+    ]
+
+    }
+ </blockquete>
+
+ - Procure a aba de task runner explorer()
 
  <blockquete>
  </blockquete>
 
- -
+# Custom Tag Helpers
+
+ - Cria uma pasta chamada "Extensions" e um arquivo chamado "EmailTagHelper".
+
+ - 
+
+ <blockquete>
+
+    public class EmailTagHelper: TagHelper
+    {
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+        {
+            //return base.ProcessAsync(context, output);
+            // Define uma saia, define o "a" como tagHelp que é a saida.
+            output.TagName = "a";
+
+            // Busca o conteudo da tag
+            var content = await output.GetChildContentAsync();
+
+            // Gerando uma saida
+            var target = content.GetContent() + "@" + "desenvolvedor.io";
+
+            // setando os valores
+            output.Attributes.SetAttribute("href", "mailto:" + target);
+            output.Content.SetContent(target);
+
+        }
+    }
+
+ </blockquete>
+    
+    ### Registrando TagHelper
+
+    - No arquivo _ViewImports, e bota o codigo que reconhece todas as taghelper.
+
+ <blockquete> @addTagHelper "*, Dev.UI.Site" </blockquete>
+
+    ### Recebendo valores no taghelper
+
+    - Cria uma propriedade publica.
+
+<blockquete> public string EmailDomain { get; set; } = "desenvolvedor.io"; </blockquete>
+
+    - Chamando a taghelper
+
+<blockquete>
+    <footer class="border-top footer text-muted">
+            <div class="container">
+                Minha App Modelo - <email email-domain="gmail.com">contato</email> -
+                <email>contato</email>
+            </div>        
+        </footer>
+</blockquete>
+
+# Como funcionam as Areas?
+
+ - As áreas proporcionam uma maneira de organizar uma aplicação ASP.NET MVC em grupos funcionais menore, cada um com seu próprio conjunto de Models, Views e Controllers.
+
+ - Uma área é efetivamente uma nova estrutura MVC dentro da aplicação ASP.NET MVC.
+
+ - Os components lógicos como Models, Views e Controllers são mantidos em pastas diferenes. Podendo utilizar recursos diferetes ou compartilhados da aplicação.
+
+ - Para criar um novo, vai no projeto -> add -> "novo item com scanffold"
+
+ - Cria uma controller e uma view.
+ 
+ - No layout define a area com "asp-area", "asp-controller" e o "asp-action" 
+
+ <blockquete>
+   < li class="nav-item">
+        < a class="nav-link text-dark" asp-area="Produtos" asp-controller="Cadastro" asp-action="Index">Cadastro</>
+    < /li>
+ </blockquete>
+ 
+ - No controller deve por o decoraito "area" 
+
+ <blockquete> [Area(nameof(Produtos))] </blockquete>
+
+ - Por ultimo define a area na rota pelo arquivo startUP
+
+ <blockquete>
+    endpoints.MapAreaControllerRoute(
+                   "teste",
+                   "Produtos",
+                   "areas/{controller=Cadastro}/{action=Index}/{id?}");
+ </blockquete>
+
+ - pode por "exist" dolado de areas para verificar se ela exist!
+
+# Exemplos de utilização
+ 
+ - Pode por na pasta view da area, uma copia do arquivo "_viewStart" para exibir o manu.
+ - Caso queira trocar o nome da pasta "area" deve fazer uma configuração dentro do metodo "ConfigureService" do arquivo StartUp.
+
+    <blockquete>
+
+    services.Configure<RazorViewEngineOptions>(optins => {
+                    optins.AreaViewLocationFormats.Clear();
+                    optins.AreaViewLocationFormats.Add("/Modulos/{2}/Views/{1}/{0}.cshtml");
+                    optins.AreaViewLocationFormats.Add("/Modulos/{2}/Views/Shared/{0}.cshtml");
+                    optins.AreaViewLocationFormats.Add("/View/Shared/{0}.cshtml");
+                });
+
+    </blockquete>
+ ### Oque motiva a ter uma área
+
+ - Configurar rotas no arquivo startUp é opcional.
+
+ - Pode congiruar as rotas das areas no proprio controler.
+
+    <blockquete>
+
+        [Area(nameof(Produtos))]
+            [Route("produtos")]
+            public class CadastroController: Controller
+            {
+                [Route("lista")]
+                [Route("")]
+                public IActionResult Index()
+                {
+                    return View();
+                }
+
+                [Route("busca")]
+                public IActionResult Busca()
+                {
+                    return View();
+                }
+
+            }
+    </blockquete>
+
+# kkkk
+ 
+ - 
 
  <blockquete>
  </blockquete>
+
+ 
+ - 
+
+ <blockquete>
+ </blockquete>
+
+ 
+ - 
+
+ <blockquete>
+ </blockquete>
+
+
+
+
