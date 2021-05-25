@@ -956,20 +956,114 @@ As partial view são muito ultilizadas também para rederizar dinamente parte de
             }
     </blockquete>
 
-# kkkk
+# Injeção de dependência (DI)
  
+ - É um pa drão de design de codificação que faz parte dos principios SOLID.
+
+ - A ideia é obter a Ioc(inversão de controle) para simplificar as responsabilidades de uma classe.
+
+ - O ASP.NET Core dá suporte a injeção de dependência de forma nativa, porém é possível trabalhar com outros conteiners como SimpleInjector, Autofac e etc.
+
+# Configurando uma injeção de dependência
+
+ - Cria uma classe "Pedido" com a propriedade id, do tipo guid.
+
+ - Uma interface com método que retorna um valor de "Pedido".
+
+ - E Uma classe que implementa esse método.
+
+ - Com isso deve se configurar uma Injeção de dependencia no método "ConfigureService", no arquivo startUp. 
+
+ - Com o método "AddTransient" ele cria automaticamente uma instancia da classe, não deixa de criar, implementar e por a Interface.
+
+ <blockquete>
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddTransient<IPedidoRepository, PedidoRepository>();            
+    }
+
+ </blockquete>
+
+ # Injetando dependências no MVC
+
+ - Ultilizando a Injeção de dependencia no controller.
+
+ <blockquete>
+
+    private readonly IPedidoRepository _pedidoRepository;
+
+        public HomeController(IPedidoRepository pedidoRepository)
+        {
+            _pedidoRepository = pedidoRepository;
+        }
+
+        public IActionResult Index()
+        {
+            var pedido = _pedidoRepository.ObterPedido();
+
+            return View();
+        }
+ </blockquete>
+ 
+ - Ultilizando Injeção de dependencia na View.
+
+ <blockquete>
+    @using Dev.UI.Site.Data
+    @inject IPedidoRepository PedidoRepository
+    Ola! @PedidoRepository.ObterPedido().Id; 
+ </blockquete>
+
+ ### sistema legado que não pode alterar o construtor.
+
+ - é pissivel injetar a dependendica sem ser no construtor, injetando diretamente no método!
+
+ <blockquete>
+    public IActionResult Index([FromServices] IPedidoRepository _pedidoRepository)
+    {
+        var pedido = _pedidoRepository.ObterPedido();
+
+        return View();
+    }
+ </blockquete>
+
+# Tipos de Ciclo de Vida
+
+ - Transiente: Obtém uma nova instância(uma nova locação de memoria) do objeto a cada solicitação
+
+ - Scoped: Reutiliza a mesma instância do objeto durante todo request(web).
+
+ - Sigleton: Ultiliza a mesma instantância para toda aplicação(cuidado), nunca muda mesmo com novos request.
+
+# Entity Framework Core
+
+ - 
+
  - 
 
  <blockquete>
  </blockquete>
 
- 
+
  - 
 
  <blockquete>
  </blockquete>
 
- 
+
+
+ - 
+
+ <blockquete>
+ </blockquete>
+
+
+ - 
+
+ <blockquete>
+ </blockquete>
+
+
  - 
 
  <blockquete>

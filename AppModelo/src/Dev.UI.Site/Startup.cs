@@ -1,8 +1,11 @@
+using Dev.UI.Site.Data;
+using Dev.UI.Site.Servicos;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 
 namespace Dev.UI.Site
 {
@@ -16,7 +19,17 @@ namespace Dev.UI.Site
             // services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_2);
             services.AddControllersWithViews();
             // services.AddRazorPages();
-             
+
+            services.AddTransient<IPedidoRepository, PedidoRepository>();
+
+            // Teste de Injeção de dependencia
+            services.AddTransient<IOperacaoTransient, Operacao>();
+            services.AddScoped<IOperacaoScoped, Operacao>();
+            services.AddSingleton<IOperacaoSingleton, Operacao>();
+            services.AddSingleton<IOperacaoSingletonInstance>(new Operacao(id:Guid.Empty));
+
+            services.AddTransient<OperacaoService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
