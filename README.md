@@ -1182,7 +1182,11 @@ As partial view são muito ultilizadas também para rederizar dinamente parte de
 
  - Cria um propriedade chamada "Alunos"
  
- <blockquete>  public DbSet<Aluno> Alunos { get; set; } </blockquete>
+ <blockquete>  
+
+    public DbSet<Aluno> Alunos { get; set; } 
+
+ </blockquete>
 
 
 # Trabalhando com Migrations
@@ -1192,7 +1196,11 @@ As partial view são muito ultilizadas também para rederizar dinamente parte de
 
  - Primeiro devese criar uma Migration com o comando no diretorio do projeto:
  
- <blockquete> dotnet ef migrations add "nomeDpMigration" -Context "nome do context" </blockquete>
+ <blockquete> 
+
+    dotnet ef migrations add "nomeDpMigration" -Context "nome do context" 
+
+ </blockquete>
 
  - Só bota o nome do contexto caso tenha mais que 1 contexto
 
@@ -1202,19 +1210,36 @@ As partial view são muito ultilizadas também para rederizar dinamente parte de
 
  - Se remove, alterando o o bjeto aluno e fazendo uma nova migração e update
 
- <blockquete> ef migrations remove </blockquete>
+ <blockquete> 
+
+    ef migrations remove 
+
+ </blockquete>
 
  - Atualiza o banco de dados, para executar o codigo gerado
  
- <blockquete> dotnet ef database update </blockquete>
+ <blockquete> 
+
+    dotnet ef database update 
+
+ </blockquete>
 
  ### update nova propriedade.
 
  - Para adicionar uma nova propriedade deve, modificar a classe, e repetir os mesmos comandos.
  - Use um nome diferente na migration.
 
- <blockquete> dotnet ef migrations add "nomeDpMigration" -Context "nome do context" </blockquete> 
- <blockquete> dotnet ef database update </blockquete>
+ <blockquete> 
+
+    dotnet ef migrations add "nomeDpMigration" -Context "nome do context" 
+
+ </blockquete> 
+
+ <blockquete> 
+
+    dotnet ef database update 
+
+ </blockquete>
 
  ### Deletando o banco
 
@@ -1224,6 +1249,9 @@ As partial view são muito ultilizadas também para rederizar dinamente parte de
 
  - CRUD está funcionando.
 
+# Segurança com ASP.NET Identity
+
+ - 
 
  <blockquete>
  </blockquete>
