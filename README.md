@@ -1037,15 +1037,193 @@ As partial view são muito ultilizadas também para rederizar dinamente parte de
 
 # Entity Framework Core
 
- - 
+ - O Entity Framework Core é o componente ideal para trabalhar com o 
+ novo stack do ASP.NET Core.
 
- - 
+ - Está pronto para utilização, porém ainda possui um roadmap de melhorias
+ e novas funcionalidades que deverão ser entregues.
 
- <blockquete>
+ - É possível trabalhar com EF 6.x no ASP.NET Core, mas será necessário escrever o códogo usando
+ o .NET Full (4.x), o que não é recomendado uma vez que o ASP.NET Core 3
+ não erá trabalhar com .NET Full (4.x).
+
+# Instalando o EF Core
+
+ - Vai nos pacotes Nugets, pesquisa por "Microsoft.EntityframeworkCore"!
+
+ - Instala a ultima verção estavel.
+
+ - Inatalação manual:
+ 
+ <blockquete> Install -pacjge Microsoft.EntityFrameworkCore </blockquete>
+ <blockquete> Microsoft.EntityFrameworkCore.SqlServer </blockquete>
+ <blockquete> Microsoft.EntityFrameworkCore.SqlServer.Design </blockquete>
+ <blockquete> Microsoft.EntityFrameworkCore.Tools </blockquete>
+
+# Configurando o DbContext
+
+ - Cria uma classe chamado "meuDbContext", você vai herdar a classe "dbContext".
+
+ - Ela se torna uma classe de contexto, aonde mapeia as classes, ligando ao
+ banco de dados.
+
+ ### Arquivo appSettings.json
+
+ - No arquivo "appSettings.json" você informa a sua connectionStrings(chave).
+
+ - Como o valor bota um onjeto que tem a chave "MeuDbContext", e valor "servidor\\instanciaDoservidor;BaseDeDados;informaçõesAmais"
+
+ <blockquete> 
+  "ConnectionStrings": {
+    "MeuDbContext":  "Server=(localdb)\\mssqllocaldb;Database=MeuBancoDoCursoAspNet;Trusted_Connection=True;MultipleActiveResultSets=true"
+  }
  </blockquete>
 
+ - Trusted_Connection: usuaria confiavel dentro do sql.
 
- - 
+ - MultipleActiveResultSets: Aceita multiplos varios resultados simuntaneamente.
+
+ ### Arquivo StartUp
+
+ - Deve configurar a classe dbContext, dentro da classe startUp!
+
+ - Aonde você informa o contexto, e qual banco ele vai conectar(connectionStrings)
+
+ - Cria uma propriedade chamada "Configuration" do tipo "IConfiguration"
+ ela recebe um valor pelo construtor.
+ 
+ <blockquete>
+
+    public IConfiguration Configuration { get; }
+
+    public Startup(IConfiguration configuration)
+    {
+        Configuration = configuration;
+    }
+
+ </blockquete>
+
+ - Busca um atalho para sua ConnectionString
+
+ <blockquete> 
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddDbContext<MeuDbContext>(optionsAction:options => 
+                options.UseSqlServer(Configuration.GetConnectionString(name:"MeuDbContext")));
+    }   
+ </blockquete>
+
+ ### Arquivo meuDbContext
+
+ - Cria um método construtor recebendo o options, configuração basica do contexto. 
+
+ <blockquete>
+    public class MeuDbContext: DbContext
+    {
+        public MeuDbContext(DbContextOptions<MeuDbContext> options)
+        :base(options)
+        { //TODO }
+    }
+ </blockquete>
+
+# Operações CRUD
+
+ - Cria uma classe chamada "Aluno", com propriedade Id do tipo Guid.
+
+ - Cria uma controller vazia chamada "TesteCrudController"
+
+ - No controller faz a injeção de dependencia do contexto para fazer o CRUD
+
+ - Cria valores pre definidos apenas para fazer teste no mesmo método.
+
+ <blockquete>
+
+    private readonly MeuDbContext _contexto;
+
+    public TesteCrudController(MeuDbContext contexto)
+    {
+        _contexto = contexto;
+    }
+
+    public IActionResult Index()
+    {
+        // Adicionando Alunos
+        var aluno = new Aluno
+        {
+            Nome = "Lincoln",
+            DataNascimento = DateTime.Now,
+            Email = "link@email.com.br"
+        };
+        _contexto.Alunos.Add(aluno);
+        _contexto.SaveChanges();
+
+        // Consultando Aluno por id ou email, busca apenas 1.
+        var aluno2 = _contexto.Alunos.Find(aluno.Id);
+        var aluno3 = _contexto.Alunos.FirstOrDefault(a => a.Email == "link@email.com.br");
+        
+        // Buscando uma coleção de aluno, busca quantos existir.
+        var aluno4 = _contexto.Alunos.Where(a => a.Nome == "Eduardo");
+
+        // Editando Aluno
+        aluno.Nome = "João";
+        _contexto.Alunos.Update(aluno);
+        _contexto.SaveChanges();
+
+        // Removendo Aluno
+        _contexto.Alunos.Remove(aluno);
+        _contexto.SaveChanges();
+
+        return View();
+    }
+
+ </blockquete>
+
+ ### Botando a classe no Arquivo de contexto
+
+ - Cria um propriedade chamada "Alunos"
+ 
+ <blockquete>  public DbSet<Aluno> Alunos { get; set; } </blockquete>
+
+
+# Trabalhando com Migrations
+
+ - O Migrations ele olha para o banco verifica se existe, para poder criar
+ um script que cria todas as tebelas com as colunas.
+
+ - Primeiro devese criar uma Migration com o comando no diretorio do projeto:
+ 
+ <blockquete> dotnet ef migrations add "nomeDpMigration" -Context "nome do context" </blockquete>
+
+ - Só bota o nome do contexto caso tenha mais que 1 contexto
+
+ ### Removendo coluna
+
+ - Caso queira remover digita o comando.
+
+ - Se remove, alterando o o bjeto aluno e fazendo uma nova migração e update
+
+ <blockquete> ef migrations remove </blockquete>
+
+ - Atualiza o banco de dados, para executar o codigo gerado
+ 
+ <blockquete> dotnet ef database update </blockquete>
+
+ ### update nova propriedade.
+
+ - Para adicionar uma nova propriedade deve, modificar a classe, e repetir os mesmos comandos.
+ - Use um nome diferente na migration.
+
+ <blockquete> dotnet ef migrations add "nomeDpMigration" -Context "nome do context" </blockquete> 
+ <blockquete> dotnet ef database update </blockquete>
+
+ ### Deletando o banco
+
+ - Pode esta deletando o banco de dados e fazendo o update, que o migration vai recriar tudo de novo só que sem os dados.
+
+ ### Testando o CRUD
+
+ - CRUD está funcionando.
+
 
  <blockquete>
  </blockquete>

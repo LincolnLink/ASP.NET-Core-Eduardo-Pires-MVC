@@ -11,11 +11,12 @@ namespace Dev.UI.Site.Controllers
 
         public OperacaoService OperacaoService2 { get; set; }
 
+        /*
         public HomeController(OperacaoService operacaoService, OperacaoService operacaoService2)
         {
             OperacaoService = operacaoService;
             OperacaoService2 = operacaoService2;
-        }
+        }*/
 
         //private readonly IPedidoRepository _pedidoRepository;
 
