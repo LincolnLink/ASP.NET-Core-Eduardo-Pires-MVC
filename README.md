@@ -1251,7 +1251,31 @@ As partial view são muito ultilizadas também para rederizar dinamente parte de
 
 # Segurança com ASP.NET Identity
 
- - 
+ - O ASP.NET Identity é um componente de segurança que trabalha com Autenticação e
+ Autorização de usuário e possui diversas funcionalidades.
+
+ - O Identity está na versão 3.0(versão Core) e é basicamente uma portabilidade da versão 2.0(.NET Full 4.x) para a nova plataforma.
+
+ - Algumas mudanças ocorreram na versão 3.0 o que o torna muito mais fácil de implementar e abstrair.
+
+
+# Configuração
+
+ - Cria uma solução nova, um projeto mvc novo.
+
+ - Instala o pacote de suporte:
+ 
+ <blockquete>
+
+    Install-Package Microsoft.AspNetCore.Identity.UI
+
+ </blockquete>
+
+ - Usando o Scaffolding, escolha a opção "Identity" extraia um "login" e um "registro", cria um contexto junto.
+
+ - Usa a mesma versão do projeto, para evitar erros!
+
+
 
  <blockquete>
  </blockquete>
