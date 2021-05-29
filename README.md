@@ -1283,6 +1283,8 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Link util: https://github.com/aspnet/Announcements/issues/380
 
+ - https://docs.microsoft.com/pt-br/aspnet/core/security/authentication/identity?view=aspnetcore-3.1&tabs=visual-studio
+
  <blockquete>
 
     services.AddDbContext<AspNetCoreIdentityContext>(options =>
