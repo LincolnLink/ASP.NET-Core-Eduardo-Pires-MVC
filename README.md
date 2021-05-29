@@ -428,7 +428,7 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
 
 - pasta shared: com tem as view, que vai ser usada em toda a aplicação.
 
-- _ViewStart: informa qual pagina sera a principal da palicação.
+- _ViewStart: informa qual pagina sera a principal da aplicação.
 
 - _ViewImports: importa component, que será usado de forma global.
 
@@ -440,7 +440,7 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
 
 - As partial views dependem do modelo implementado na view principal, gerando certa limitação no seu uso.
 
-As partial view são muito ultilizadas também para rederizar dinamente parte de uma view através de requisições AJAX.
+As partial view são muito ultilizadas também para rederizar dinamicamente parte de uma view através de requisições AJAX.
 
 # Apresentando os View Components
 
@@ -1275,18 +1275,81 @@ As partial view são muito ultilizadas também para rederizar dinamente parte de
 
  - Usa a mesma versão do projeto, para evitar erros!
 
+ ### Configuração no StratUp
 
+ - No arquivo "IdentityHostingStartup" remove a configuração de "service" e bota no arquivo de startUp original.
+
+ - Ele cria um segundo startUp.
+
+ - Link util: https://github.com/aspnet/Announcements/issues/380
 
  <blockquete>
+
+    services.AddDbContext<AspNetCoreIdentityContext>(options =>
+        options.UseSqlServer(Configuration.GetConnectionString("AspNetCoreIdentityContextConnection")));
+
+    services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+        .AddDefaultUI()
+        .AddEntityFrameworkStores<AspNetCoreIdentityContext>();
+
  </blockquete>
 
+ - Usa o método ".AddDefaultUI()" para definir o visual.
 
+ <blockquete>
+
+    .AddDefaultUI()
+
+ </blockquete>
+
+ - No final do arquivo "stratUp" usa o método "app.UseAuthentication();" para o Identity funcionar.
+
+ ### Configurando as tabelas
+ 
+ - Executa os metodos para gerar as tabelas.
+
+ <blockquete>
+
+    dotnet ef migrations add "Identity"
+
+ </blockquete>
+ 
+ <blockquete> 
+
+    dotnet ef database update 
+
+ </blockquete>
+
+ - No Identity não tem view e sim page ( @page )
+
+ - Implementa a ViewParcial que tem a tela de login.
+
+ <blockquete>
+
+  < partial name="_LoginPartial" />
+
+ </blockquete>
+
+ - No startup adiciona "endpoints.MapRazorPages();", para as rotas funcionar.
+ 
+ <blockquete>
+
+    app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+                endpoints.MapRazorPages();
+            });
+
+ </blockquete>
+
+ - Depois importa outra pagina do Identity chamada "TwoFactorAuthenticationModel"
+
+# Autenticação
 
  - 
-
- <blockquete>
- </blockquete>
-
 
  - 
 
