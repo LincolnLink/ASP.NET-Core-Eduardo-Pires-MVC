@@ -1347,11 +1347,128 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  </blockquete>
 
- - Depois importa outra pagina do Identity chamada "TwoFactorAuthenticationModel"
+ - Depois importa outra pagina do Identity chamada "TwoFactorAuthenticationModel" na pasta area.
+
+
+ - codigo da documentação para configurar dotnet 3.1
+
+ - link: https://docs.microsoft.com/pt-br/aspnet/core/security/authentication/identity?view=aspnetcore-3.1&tabs=visual-studio
+
+
+ <blockquete>
+
+    services.AddRazorPages();
+
+    services.Configure<IdentityOptions>(options =>
+    {
+        // Password settings.
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequiredLength = 6;
+        options.Password.RequiredUniqueChars = 1;
+
+        // Lockout settings.
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.AllowedForNewUsers = true;
+
+        // User settings.
+        options.User.AllowedUserNameCharacters =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+        options.User.RequireUniqueEmail = false;
+    });
+
+    services.ConfigureApplicationCookie(options =>
+    {
+        // Cookie settings
+        options.Cookie.HttpOnly = true;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+
+        options.LoginPath = "/Identity/Account/Login";
+        options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+        options.SlidingExpiration = true;
+    });
+
+ </blockquete>
 
 # Autenticação
 
- - 
+ - O metadado "[Authorize]" cria um bloqueio na controller/view, caso o usuario não esteja logado, pode por na classe, bloqueando todas as paginas.
+ 
+ <blockquete>
+
+    [Authorize]
+    public IActionResult Privacy()
+    {
+        return View();
+    }
+
+ </blockquete>
+
+ - [AllowAnonymous] é um metadado que abre exceção, assim o usuario consegue ver uma pagina para logar.
+
+ - O método "PasswordSignInAsync" que fica na Page de Login, faz a autenticação guardando os dados no cookie.
+
+ # Autorização
+
+ - É um nivel a mais, alem de está logado deve ter a autorização/ poder, de está vendo a pagina.
+
+ - Usando a palavra chave "Roles" no metadado [Authorize]!
+
+ - No startup deve por a configuração do Role ".AddRoles<IdentityRole>()"
+
+ <blockquete>
+
+    services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
+                .AddDefaultUI()
+                .AddEntityFrameworkStores<AspNetCoreIdentityContext>();
+
+ </blockquete>
+
+ - Na tabela "aspnetRoles" cria uma configuracao "admin" com id 1,
+ depois na tabela "aspnetUserRoles" cria o vinculo com id do usuario
+ e o id.
+
+ # Trabalhando com Claims
+
+ - O que seria uma Claims: Guarda imformações, e todas as Claims são persistidas no cookies!
+
+ - A tabela "aspnetUserClaims" é a que vincula as claims com o usuario.
+
+ - Alem da configuração no controller deve configurar no startup
+
+ - No startup, declara as "Policy"
+ 
+ <blockquete>
+
+    services.AddAuthorization(options =>
+    {
+        options.AddPolicy(name:"PodeExcluir", configurePolicy:policy => policy.RequireClaim("PodeExcluir"));
+    });
+
+ </blockquete>
+
+ - Na controller, ao inves de criar uma "Roles" cria uma "Policy"
+
+ <blockquete>
+
+    [Authorize(Policy = "PodeExcluir")]
+    public IActionResult SecretClaim()
+    {
+        return View("Secret");
+    }
+
+ </blockquete>
+
+
+
+ <blockquete>
+ </blockquete>
+
+
 
  - 
 

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AspNetCoreIdentity.Areas.Identity.Data;
+using AspNetCoreIdentity.Extensions;
 
 namespace AspNetCoreIdentity
 {
@@ -31,6 +32,8 @@ namespace AspNetCoreIdentity
                    options.UseSqlServer(Configuration.GetConnectionString("AspNetCoreIdentityContextConnection")));
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
+                .AddDefaultUI()
                 .AddEntityFrameworkStores<AspNetCoreIdentityContext>();
 
             services.AddRazorPages();
@@ -65,6 +68,18 @@ namespace AspNetCoreIdentity
                 options.LoginPath = "/Identity/Account/Login";
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
                 options.SlidingExpiration = true;
+            });
+
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(name:"PodeExcluir", configurePolicy:policy => policy.RequireClaim("PodeExcluir"));
+
+                options.AddPolicy(name: "PodeLer", configurePolicy: policy => policy.Requirements.Add(new PermissaoNecessaria("PodeLer")));
+
+                options.AddPolicy(name: "PodeEscrever", configurePolicy: policy => policy.Requirements.Add(new PermissaoNecessaria("PodeEscrever")));
+
+
             });
 
 
