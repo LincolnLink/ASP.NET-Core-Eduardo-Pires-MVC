@@ -21,7 +21,8 @@ namespace AspNetCoreIdentity.Areas.Identity.Pages.Account
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<IdentityUser> signInManager, 
+        public LoginModel(
+            SignInManager<IdentityUser> signInManager, 
             ILogger<LoginModel> logger,
             UserManager<IdentityUser> userManager)
         {
@@ -63,7 +64,7 @@ namespace AspNetCoreIdentity.Areas.Identity.Pages.Account
 
             returnUrl = returnUrl ?? Url.Content("~/");
 
-            // Clear the existing external cookie to ensure a clean login process
+            // Limpe o cookie externo existente para garantir um processo de login limpo
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -71,14 +72,15 @@ namespace AspNetCoreIdentity.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
+        // Post dos dados para fazer o login.
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
 
             if (ModelState.IsValid)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+                // Isso não conta as falhas de login para o bloqueio da conta
+                // Para habilitar falhas de senha para acionar o bloqueio de conta, defina lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
@@ -101,7 +103,7 @@ namespace AspNetCoreIdentity.Areas.Identity.Pages.Account
                 }
             }
 
-            // If we got this far, something failed, redisplay form
+            // Se chegamos até aqui, algo falhou, reexibir o formulário
             return Page();
         }
     }

@@ -235,7 +235,7 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
 
 - Definir o tipo de parametro ajuda na segurança !
 
-#  Trabalhando com Action Results
+# Trabalhando com Action Results
 
 - IActionResults é uma interface que retorna algo de forma asyncrona! 
 
@@ -744,7 +744,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
         }
  </blockquete>
 
-### Fazendo o TagHelpers funcionar.
+ ### Fazendo o TagHelpers funcionar.
 
     - Cria o arquivo "_ViewImport" dolado da "_ViewSatrt", e adiciona o codigo.
 
@@ -757,7 +757,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
     - Se cria esse codigo para os TagHelpers poder ser reconhecido.
 
-### implementando o bootstrap
+ ### implementando o bootstrap
 
     - Cria uma pasta chamada "wwwroot", adiciona na aplicação usado a opção "Biblioteca ao lado do cliente".
 
@@ -765,7 +765,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
     - Depois bota a referencia dos arquivos no view "_Layoutcshtml"
 
-### decidindo se o arquivo carrega
+ ### decidindo se o arquivo carrega
 
  - A tAG "environment" define oque vai carregar em produção ou não.
  
@@ -985,7 +985,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  </blockquete>
 
- # Injetando dependências no MVC
+# Injetando dependências no MVC
 
  - Ultilizando a Injeção de dependencia no controller.
 
@@ -1258,10 +1258,23 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Algumas mudanças ocorreram na versão 3.0 o que o torna muito mais fácil de implementar e abstrair.
 
+ ### Camadas Identity no MVC.
+
+ - Data Access Layer: Conecta com o banco de dados. (Camada de dados)
+
+ - Identity Store: faz as percistencia no banco! (Camada de dados)
+
+   - Exemplo: UserStore, RoleStore.
+ 
+ - Identity Manager: A plicação ASP.NET Core App ela interage com essa camada (Camada de negocios)
+
+   - Exemplo: UserManager, RoleManager.
 
 # Configuração
 
  - Cria uma solução nova, um projeto mvc novo.
+ 
+ - Pode está instalando o Identity na hora de criar o projeto de forma automatica, não escolha pois o tutotias explica de forma manual.
 
  - Instala o pacote de suporte:
  
@@ -1270,16 +1283,50 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
     Install-Package Microsoft.AspNetCore.Identity.UI
 
  </blockquete>
+ 
+ - O Identity pode por em uma area.
 
  - Usando o Scaffolding, escolha a opção "Identity" extraia um "login" e um "registro", cria um contexto junto.
 
  - Usa a mesma versão do projeto, para evitar erros!
 
+ - O Scaffolding gera as pages, um novo startup e um contexto para gerar tabelas
+
+ - O Contexto dele é baseado em "IdentityDbContext", que gera de dbConext.
+
+ - É bom deixar o context do Identity separado.
+
  ### Configuração no StratUp
 
  - No arquivo "IdentityHostingStartup" remove a configuração de "service" e bota no arquivo de startUp original.
 
- - Ele cria um segundo startUp.
+
+ - ele gera um connectString!
+ 
+ <blockquete>
+    
+    "ConnectionStrings": {
+        "AspNetCoreIdentityContextConnection": "Server=(localdb)\\mssqllocaldb;Database=AspNetCoreIdentity;Trusted_Connection=True;MultipleActiveResultSets=true"
+    }
+
+ </blockquete>
+
+ - IdentityUser é uma classe que trabalha como se fosse um usuario na aplicação.
+
+ <blockquete>
+
+    services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+        .AddRoles<IdentityRole>()
+        .AddDefaultUI()
+        .AddEntityFrameworkStores<AspNetCoreIdentityContext>();
+ 
+ </blockquete>
+
+ - AddfaultUI: configuracao das pages, o Padrão é BootStrap4.
+
+ - AddEntityFrameworkStores: está configurando o tipo de acesso a dados que o Identity vai usar.
+
+ - Ele cria um segundo startUp, apaga e bota a configuração na principal.
 
  - Link util: https://github.com/aspnet/Announcements/issues/380
 
@@ -1293,14 +1340,6 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
     services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
         .AddDefaultUI()
         .AddEntityFrameworkStores<AspNetCoreIdentityContext>();
-
- </blockquete>
-
- - Usa o método ".AddDefaultUI()" para definir o visual.
-
- <blockquete>
-
-    .AddDefaultUI()
 
  </blockquete>
 
@@ -1322,15 +1361,27 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  </blockquete>
 
+ ### Page 
+
+ - Toda Page herda da classe "PageModel"
+
+    - OnGetAsync(): É um método que faz retornar uma view via get.
+
+    - OnPostAsync(): Executado quando faz um Post atraver da view.
+
  - No Identity não tem view e sim page ( @page )
 
  - Implementa a ViewParcial que tem a tela de login.
+
+ - Na tela "_Layout.cshtml" bota a viewParcial "_LofinPartial.cshtml"
 
  <blockquete>
 
   < partial name="_LoginPartial" />
 
  </blockquete>
+
+ ### Rotas do Identity MVC
 
  - No startup adiciona "endpoints.MapRazorPages();", para as rotas funcionar.
  
@@ -1349,11 +1400,13 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Depois importa outra pagina do Identity chamada "TwoFactorAuthenticationModel" na pasta area.
 
+ - Para editar qualquer pagina é preciso repetir o processo de improtação.
 
- - codigo da documentação para configurar dotnet 3.1
+ - codigo da documentação para configurar dotnet 3.1.
+
+ ### Codigo extra para funcionar! (rota)
 
  - link: https://docs.microsoft.com/pt-br/aspnet/core/security/authentication/identity?view=aspnetcore-3.1&tabs=visual-studio
-
 
  <blockquete>
 
@@ -1393,9 +1446,13 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  </blockquete>
 
-# Autenticação
+# Autenticação ( [Authorize] )
+
+ - É autenticação mas o atributo se chama [Authorize]!
 
  - O metadado "[Authorize]" cria um bloqueio na controller/view, caso o usuario não esteja logado, pode por na classe, bloqueando todas as paginas.
+
+ - Pode por em toda a controller ou apenas no método da aquela pagina que você quer bloquear.
  
  <blockquete>
 
@@ -1411,7 +1468,9 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - O método "PasswordSignInAsync" que fica na Page de Login, faz a autenticação guardando os dados no cookie.
 
- # Autorização
+ - PasswordSignInAsync: Faz validação do usuario e senha, faz a autenticação e bota no cookie.
+
+# Autorização ( Roles )
 
  - É um nivel a mais, alem de está logado deve ter a autorização/ poder, de está vendo a pagina.
 
@@ -1428,30 +1487,52 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  </blockquete>
 
- - Na tabela "aspnetRoles" cria uma configuracao "admin" com id 1,
- depois na tabela "aspnetUserRoles" cria o vinculo com id do usuario
- e o id.
+ - Na tabela "dbo.AspNetRoles" você cria a configuração das "Roles", botando id, Name, NormalizedName, Concurre...
 
- # Trabalhando com Claims
+ - Na Tabela "dbo.AspNetUserRoles" você cria um vinculo entre o id do seu usuario, com o id da roule existente que você deseja vincular.
 
- - O que seria uma Claims: Guarda imformações, e todas as Claims são persistidas no cookies!
+ - Para definir essa configuração, deve implementar a roule no método de controller que você deseja bloquear.
 
- - A tabela "aspnetUserClaims" é a que vincula as claims com o usuario.
+<blockquete>
+
+    [Authorize(Roles = "Admin")]
+    public IActionResult Secret()
+    {
+        return View();
+    }
+
+</blockquete>
+
+- Pode definir duas Roles uma dolado da outra 
+
+<blockquete>
+
+    [Authorize(Roles = "Admin, Gestor")]
+    public IActionResult Secret()
+    {
+        return View();
+    }
+
+</blockquete>
+
+ - Da trabalho em trocar todos os locais que tem aquela "Roler".
+
+ - 
+
+
+# Trabalhando com Claims
+
+ - Claims: pode ser qualquer coisa, exemplo : usuario, email, aonde estudou, etc, armazena qualquer tipo de informação.
+
+ - As Claims são guardadas no Cookies!
+
+ - A tabela "dbo.AspNetUserClaims" é a que vincula as Claims com o usuario.
 
  - Alem da configuração no controller deve configurar no startup
-
- - No startup, declara as "Policy"
  
- <blockquete>
+ - Policy: uma configuração das Claims, que deve ser definida no arquivo de StartUp e no arquivo de Controllers!
 
-    services.AddAuthorization(options =>
-    {
-        options.AddPolicy(name:"PodeExcluir", configurePolicy:policy => policy.RequireClaim("PodeExcluir"));
-    });
-
- </blockquete>
-
- - Na controller, ao inves de criar uma "Roles" cria uma "Policy"
+ - No Controllers: É parecido com as Roles
 
  <blockquete>
 
@@ -1463,19 +1544,150 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  </blockquete>
 
-
+ - Na StartUp: 
 
  <blockquete>
+
+    services.AddAuthorization(options =>
+    {
+         options.AddPolicy(
+            name:"PodeExcluir",
+            configurePolicy: policy => policy.RequireClaim("PodeExcluir")
+        );
+    });
+
+</blockquete>
+
+ - Deve ter uma Claim para cada permissão.
+
+ ### Roles + Claims
+
+ - Pode vincular Roles com Claims , cadastrando o vinculo na tabela, "dbo.AspNetRoleClaims"!
+
+ - Associando o id da Role com o tipo de Claim!
+
+ ### Autorização personalizada
+
+ - Toda "policy.Requirements" do arquivo StartUp deve ter uma "AuthorizationHandler".
+ 
+ - Chama o método na StartUp, para validar a autorização.
+
+ <blockquete>
+
+  services.AddAuthorization(options =>
+    {
+        options.AddPolicy(
+            name: "PodeLer", 
+            configurePolicy: policy => policy.Requirements.Add(new PermissaoNecessaria("PodeLer"))
+        );
+
+        options.AddPolicy(
+            name: "PodeEscrever", 
+            configurePolicy: policy => policy.Requirements.Add(new PermissaoNecessaria("PodeEscrever"))
+        );
+    }
+
  </blockquete>
 
+ - Cria uma pasta chamada "Extensions" depois uma arquivo chamada "AuthorizationHelper.cs"
 
+ - Dentro cria uma classe chamada "PermissaoNecessaria" que implementa a interface "IAuthorizationRequirement".
 
+ - Essa classe serve apenas para pegar um valor string pelo construtor.
+
+<blockquete>
+
+    public class PermissaoNecessaria : IAuthorizationRequirement
+    {
+        public string Permissao { get; }
+
+        public PermissaoNecessaria(string permissao)
+        {
+            Permissao = permissao;
+        }
+    }
+
+</blockquete>
+
+- Cria uma segunda classe, chamado "PermissaoNecessariaHandler", que implementa AuthorizationHandler<T>.
+
+- O no lugar do "T" coloca a primeira classe!
+
+- faz um Override do método HandleRequirementAsync().
+
+- Verifica se o tipo é igual "Permissao", e se tem a claim passada por parametro.
+
+- Verifica se o usuario tem o tipo da Claim e o valor da Claim, definido na tabela "dbo.AspNetUserClaims".
+
+ <blockquete>
+
+  public class PermissaoNecessariaHandler : AuthorizationHandler<PermissaoNecessaria>
+  {
+    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissaoNecessaria requisito)
+    {            
+      if(context.User.HasClaim(c => c.Type == "Permissao" && c.Value.Contains(requisito.Permissao)))
+      {
+        // Informa que foi sucesso!
+        context.Succeed(requisito);
+      }
+
+      // Termina a Task
+      return Task.CompletedTask;
+    }
+  }
+
+ </blockquete>
+
+ - No Controller cria um metodo novo e uma page nova com o nome de "SecretClaimEscrever",
+  passando a claim "SecretClaimEscrever". 
+
+ <blockquete>
+
+    [Authorize(Policy = "PodeEscrever")]
+    public IActionResult SecretClaimEscrever()
+    {
+        return View();
+    }
+
+ </blockquete>
+
+ - Por final na classe StartUp cria uma injeção de dependencia.
+
+ <blockquete>
+
+    services.AddSingleton<IAuthorizationHandler, PermissaoNecessariaHandler>();
+
+ </blockquete>
+
+# Customizando a autenticação da App (alternativa de configurar as claim)
+
+ - 
+ 
  - 
 
  <blockquete>
  </blockquete>
+ 
+ - 
 
+ <blockquete>
+ </blockquete>
+ 
+ - 
 
+ <blockquete>
+ </blockquete>
+ 
+ - 
+
+ <blockquete>
+ </blockquete>
+ 
+ - 
+
+ <blockquete>
+ </blockquete>
+ 
  - 
 
  <blockquete>

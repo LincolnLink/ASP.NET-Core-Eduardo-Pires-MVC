@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCoreIdentity.Controllers
 {
-    [Authorize]
+    [Authorize] //Só tem acesso usuario que está logado
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -20,12 +20,14 @@ namespace AspNetCoreIdentity.Controllers
             _logger = logger;
         }
 
-        [AllowAnonymous]
+
+
+
+        [AllowAnonymous] // Uma exceção, mesmo com bloqueio de autenticação, usuarios não logado consegue ver
         public IActionResult Index()
         {
             return View();
         }
-
         
         public IActionResult Privacy()
         {   
@@ -41,7 +43,13 @@ namespace AspNetCoreIdentity.Controllers
         [Authorize(Policy = "PodeExcluir")]
         public IActionResult SecretClaim()
         {
-            return View("Secret");
+            return View();
+        }
+
+        [Authorize(Policy = "PodeEscrever")]
+        public IActionResult SecretClaimEscrever()
+        {
+            return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
