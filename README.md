@@ -1811,12 +1811,52 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
  
 # Trabalhando na classe Startup.cs
 
-- 
+ - Cria um método de extenção, para deixar a classe StartUp mais limpa.
+
+ - Cria uma class static chamada "DependencyInjectionConfig" com o método static "ResolveDependencies".
+
+ - Deve retornar "IServiceCollection".
+
+ - Métodos de extenção deve ser estatic e criado em classes static.
+
+ - O método recebe como parametro "this IServiceCollection services"
+
+ - e retorna um " return services; "
+
+ - No corpo do metodo deve ter todas as configurações de Injeção de dependencia, que ficava no arquivo StartUp
 
  <blockquete>
+
+    public static class DependencyInjectionConfig
+    {
+        public static IServiceCollection ResolveDependencies(this IServiceCollection services)
+        {
+            // Regra vale para todos, 
+            services.AddSingleton<IAuthorizationHandler, PermissaoNecessariaHandler>();
+
+            return services;
+        }        
+    }
+
  </blockquete>
  
+ - o Método é chamado na startUp
+
+ <blockquete>
+
+    // As Injeções de Dependencia
+    services.ResolveDependencies();
+
+ </blockquete>
+
+ - Esse mesmo procedimento foi feito com o método "AddIdentityConfig" que recebeu as configurações do Identity,
+ que está na classe "DependencyInjectionConfig".
+
+ - Esse mesmo procedimento também foi feito com o método "AddAuthorizationConfig" que ficou na classe "IdentityConfig",
+ esse método recebe toda a configuração das CLAIMs.
+
  - 
+        
 
  <blockquete>
  </blockquete>
