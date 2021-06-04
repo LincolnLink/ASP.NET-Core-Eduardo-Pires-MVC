@@ -1855,16 +1855,62 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
  - Esse mesmo procedimento também foi feito com o método "AddAuthorizationConfig" que ficou na classe "IdentityConfig",
  esse método recebe toda a configuração das CLAIMs.
 
- - 
-        
+# Ambientes de execução
+
+ - Estudando o arquivo "launchSettings", aonde é configurado o ambiente.
+
+ - Define 4 ambientes diferentes nos Prodiles!       
 
  <blockquete>
+
+        "profiles": {
+
+            "IIS - Dev": {
+                "commandName": "IISExpress",
+                "launchBrowser": true,
+                "environmentVariables": {
+                    "ASPNETCORE_ENVIRONMENT": "Development"
+                }
+            },
+
+            "IIS - Staging": {
+                "commandName": "IISExpress",
+                "launchBrowser": true,
+                "environmentVariables": {
+                    "ASPNETCORE_ENVIRONMENT": "Staging"
+                }
+            },
+
+            "IIS - Prod": {
+                "commandName": "IISExpress",
+                "launchBrowser": true,
+                "environmentVariables": {
+                    "ASPNETCORE_ENVIRONMENT": "Production"
+                }
+            },
+
+            "Self Hosting": {
+                "commandName": "Project",
+                "launchBrowser": true,
+                "applicationUrl": "http://localhost:5000",
+                "environmentVariables": {
+                    "ASPNETCORE_ENVIRONMENT": "Development"
+                }
+            }
+        }
+
  </blockquete>
-
  
- - 
+ - Cria o arquivo "appsettings.Development.json", "appsettings.Production.json", "appsettings.Staging.json", apenas duplicando.
 
+ - Todos eles recebe a connectionString atual(a do localhost), Remove a connectionString do "appsettings.json"
+
+ ### Vinculando os ambientes com cada appsettings correspondente.
+
+ - Esse vinculo é feito na classe StartUp
  <blockquete>
+
+
  </blockquete>
  
  - 

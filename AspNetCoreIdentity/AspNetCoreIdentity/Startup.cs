@@ -1,15 +1,13 @@
+using AspNetCoreIdentity.Config;
+using AspNetCoreIdentity.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
-using AspNetCoreIdentity.Areas.Identity.Data;
-using AspNetCoreIdentity.Extensions;
-using Microsoft.AspNetCore.Authorization;
-using AspNetCoreIdentity.Config;
+
+
+
 
 namespace AspNetCoreIdentity
 {
@@ -17,9 +15,21 @@ namespace AspNetCoreIdentity
     {
         public IConfiguration Configuration { get; }
 
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment hostEnvironment)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(hostEnvironment.ContentRootPath)
+                .AddJsonFile(path:"appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile(path: $"appsettings.{hostEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
+
+            if (hostEnvironment.IsProduction())
+            {
+                builder.AddUserSecrets<Startup>();
+            }
+
+
+            Configuration = builder.Build();
         }
 
        
@@ -42,7 +52,7 @@ namespace AspNetCoreIdentity
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
