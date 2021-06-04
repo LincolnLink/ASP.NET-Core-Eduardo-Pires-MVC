@@ -1908,7 +1908,27 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
  ### Vinculando os ambientes com cada appsettings correspondente.
 
  - Esse vinculo é feito na classe StartUp
+
  <blockquete>
+
+        public IConfiguration Configuration { get; }
+
+        public Startup(IHostingEnvironment hostEnvironment)
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(hostEnvironment.ContentRootPath)
+                .AddJsonFile(path:"appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile(path: $"appsettings.{hostEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
+
+            if (hostEnvironment.IsProduction())
+            {
+                builder.AddUserSecrets<Startup>();
+            }
+
+
+            Configuration = builder.Build();
+        }
 
 
  </blockquete>
