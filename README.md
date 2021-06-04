@@ -1566,7 +1566,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Associando o id da Role com o tipo de Claim!
 
- ### Autorização personalizada
+ ### Autorização personalizada (Recomendada pela Microsoft)
 
  - Toda "policy.Requirements" do arquivo StartUp deve ter uma "AuthorizationHandler".
  
@@ -1659,9 +1659,168 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  </blockquete>
 
-# Customizando a autenticação da App (alternativa de configurar as claim)
+# Atributo personalizado, Customizando a autenticação da App (Recomendade pelo Eduardo Pires)
 
+ - Cria uma classe chamada "CustomAuthorization" na pasta "Extensions"
+ 
+ - Cria 3 classes nesse arquivo, a ideia é criar um atributo para validar na controller.
+
+ - 1° Classe deve ter a logica de verificar as claims e ver se está autenticado.
+
+ <blockquete>
+
+        public class CustomAuthorization
+        {       
+            public static bool ValidarClaimsUsuario(HttpContext context, string claimName, string claimValue)
+            {
+                return context.User.Identity.IsAuthenticated &&
+                    context.User.Claims.Any(c => c.Type == claimName && c.Value.Contains(claimValue));
+            }
+        }   
+
+ </blockquete>
+
+
+ - 2° class recebe o valor, é um filtro do ASP.NET,
+  definindo um filtro usando a interface "IAuthorizationFilter".
+
+ <blockquete>
+
+        public class RequisitoClaimFilter : IAuthorizationFilter
+        {
+            private readonly Claim _claim;
+
+            public RequisitoClaimFilter(Claim claim)
+            {
+                _claim = claim;
+            }
+
+            public void OnAuthorization(AuthorizationFilterContext context)
+            {
+
+                //Verificando se está autenticado, e redireciona para pagina de login.
+                if(!context.HttpContext.User.Identity.IsAuthenticated)
+                {
+                    context.Result = new RedirectToRouteResult(new RouteValueDictionary(
+                    new {
+                        area = "Identity",
+                        page = "/Account/Login",
+                        ReturnUrl = context.HttpContext.Request.Path.ToString()
+                    }));
+
+                    return;
+                }
+
+                // Método static pode usar diretamente!
+                if(!CustomAuthorization.ValidarClaimsUsuario(context.HttpContext, _claim.Type, _claim.Value))
+                {
+                    // Se ele não passar na validação vai da acesso negado.
+                    context.Result = new ForbidResult();
+                }
+            }
+        }
+
+ </blockquete>
+
+ - 3° class tem o objetivo de transformar a 2° classe em atributo, com a interface "TypeFilterAttribute"
+
+ - Converte a classe filtro em atributo para usar na controller.
+
+ <blockquete>
+
+        public class ClaimsAuthorizeAttribute : TypeFilterAttribute
+        {
+            public ClaimsAuthorizeAttribute(string claimName, string claimValue) 
+            : base(typeof(RequisitoClaimFilter))
+            {
+                Arguments = new object[] { new Claim(claimName, claimValue) };
+            }
+        }
+
+ </blockquete>
+
+ ### Ultilizando o atributo personalizado.
+  
+ - Cria um novo metodo e view chamado "ClaimsCustom"
+
+ - Essa validação é feita de uma forma diferente.
+
+ <blockquete>
+
+        [ClaimsAuthorize("Home","Secret")]
+        public IActionResult ClaimsCustom()
+        {
+            return View();
+        }
+
+ </blockquete>
+
+# Logica dos atributos usando nas Razo Page.
+ 
+ - Cria uma classe chamada "RazorExtensions", com os 3 métodos, 
+ 
+  - 1° Se quizer validar algo na view razor.
+  - 2° Caso queira desabilitar um botão.
+  - 3° Caso queira desabilidatr um link.
+
+ <blockquete>
+  
+        public static bool IfClaim(this RazorPage page, string claimName, string claimValue)
+        {
+            return CustomAuthorization.ValidarClaimsUsuario(page.Context, claimName, claimValue);
+        }
+
+        public static string IfClaimShow(this RazorPage page, string claimName, string claimValue)
+        {
+            return CustomAuthorization.ValidarClaimsUsuario(page.Context, claimName, claimValue) ? "" : "disabled";
+        }
+
+        public static IHtmlContent IfClaimShow(this IHtmlContent page, HttpContext context, string claimName, string claimValue)
+        {
+            return CustomAuthorization.ValidarClaimsUsuario(context, claimName, claimValue) ? page : null;
+        }
+
+ </blockquete>
+
+ ### Ultilizando "Logica dos atributos usando nas Razo Page"
+ 
+ - Em uma view qualquer, bota a logia:
+
+ <blockquete>
+ 
+    @using AspNetCoreIdentity.Extensions
+
+    @{
+        if (this.IfClaim("Produtos", "Adicionar"))
+        {
+
+            <p> Você só verá isso se tiver permissão de adicionar!</p>
+        }
+    }
+
+        
+    <div>
+        @Html.ActionLink("Secret", "Secret").IfClaimShow(Context ,"Produtos", "Adicionar")
+    </div>
+    <br />
+    <div href="#" class="btn btn-danger @Html.Raw(this.IfClaimShow("Produtos", "Excluir"))">
+        Exluir
+    </div> 
+
+ </blockquete>
+ 
+# Trabalhando na classe Startup.cs
+
+- 
+
+ <blockquete>
+ </blockquete>
+ 
  - 
+
+ <blockquete>
+ </blockquete>
+
  
  - 
 
