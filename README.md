@@ -1621,20 +1621,20 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  <blockquete>
 
-  public class PermissaoNecessariaHandler : AuthorizationHandler<PermissaoNecessaria>
-  {
-    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissaoNecessaria requisito)
-    {            
-      if(context.User.HasClaim(c => c.Type == "Permissao" && c.Value.Contains(requisito.Permissao)))
-      {
-        // Informa que foi sucesso!
-        context.Succeed(requisito);
-      }
+    public class PermissaoNecessariaHandler : AuthorizationHandler<PermissaoNecessaria>
+    {
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissaoNecessaria requisito)
+        {            
+        if(context.User.HasClaim(c => c.Type == "Permissao" && c.Value.Contains(requisito.Permissao)))
+        {
+            // Informa que foi sucesso!
+            context.Succeed(requisito);
+        }
 
-      // Termina a Task
-      return Task.CompletedTask;
+        // Termina a Task
+        return Task.CompletedTask;
+        }
     }
-  }
 
  </blockquete>
 
