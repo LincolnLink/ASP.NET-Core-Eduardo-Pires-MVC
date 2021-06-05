@@ -1930,8 +1930,190 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
             Configuration = builder.Build();
         }
 
+ </blockquete>
+
+# Protegendo dados com User Secrets.
+
+# Tratamento de erros.
+
+# Realizando o Log de tudo.
+
+# Trabalhando com Filtros.
+
+# Desenvolvendo uma aplicação MVC Core completa.
+
+# Objetivos do módulo (Explicando Projeto)
+
+# Começando da forma fácil
+
+# Conclusão da forma fácil
+
+# Setup da aplicação completa (Projeto: MinhaAppMvcCompleta)
+
+ - Cria um projeto MVC DotnetCore 3.1
+
+ - Cria uma biblioteca para projeto Business, e projeto Data.
+
+ - No projeto Business cria as pastas: Models, Services, Notificacoes, Validations, Interfaces
+
+ - No projeto Data cria as pastas: Context, Mappings, Repository
+
+ - Cria as Modules.
+
+# Mapeando as entidades para o banco de dados (API Fluent)
+
+ - Cria uma classe de contexto chamado "MeuDbContext"
+
+ - Instala o pacote do EF
+
+ <blockquete>
+
+    Install-Package Microsoft.EntityFrameworkCore -Version 3.1.15
 
  </blockquete>
+
+ - Cria a referencia com as modules, e defina o contexto. 
+
+  <blockquete>
+
+        public class MeuDbContext : DbContext
+        {
+            public MeuDbContext(DbContextOptions options) : base(options)
+            {
+
+            }
+
+            public DbSet<Produto> Produtos { get; set; }
+
+            public DbSet<Produto> Enderecos { get; set; }
+
+            public DbSet<Produto> Fornecedores { get; set; }
+        }
+
+  </blockquete>
+
+  - Instala o pacote adicional
+
+<blockquete>
+
+    Install-Package Microsoft.EntityFrameworkCore.Relational -Version 3.1.15
+
+</blockquete>
+
+- Cria uma classe chamada "ProdutoMapping", depois implementa a interface baseado em uma model, "IEntityTypeConfiguration<Produto>", esse arquivo deve ficar na pasta Mappings.
+
+- Cria o mapeamento das Modules
+
+ <blockquete>
+
+        public class ProdutoMapping : IEntityTypeConfiguration<Produto>
+        {
+            public void Configure(EntityTypeBuilder<Produto> builder)
+            {
+                // Define a chave primaria
+                builder.HasKey(p => p.Id);
+
+                // Define o campo como requirido, define o tipo da coluna            
+                builder.Property(p => p.Nome)
+                    .IsRequired()
+                    .HasColumnType("varchar(200)");
+
+                // Define o campo como requirido, define o tipo da coluna            
+                builder.Property(p => p.Descricao)
+                    .IsRequired()
+                    .HasColumnType("varchar(1000)");
+
+                // Define o campo como requirido, define o tipo da coluna            
+                builder.Property(p => p.Imagem)
+                    .IsRequired()
+                    .HasColumnType("varchar(100)");
+
+                builder.ToTable("Produtos");
+
+            }
+        }
+
+ </blockquete>
+
+ - Cria o vinculo do mapeamento com o contexto.
+ - Comando que pega o mapeamento definido na pasta Mappings.
+ - Reflexion não é muito recomendado mas vai fazer uma vez só.
+ 
+ <blockquete>
+
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(MeuDbContext).Assembly);
+
+ </blockquete>
+
+- Desativando o cascaiter, impede que a classe ao ser excluida, seja excluida junto!
+- Faz uma pesquisa de relações dentro do modelBuild, pegando o tipo das entidades.
+- selectMany cria uma lista, atraves das ForeignKeys, pega o comportamento a pós a exclusão (DeleteBehavior)
+- Passa o "ClientSetNull". 
+ <blockquete>
+
+        foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+                relationship.DeleteBehavior = DeleteBehavior.ClientSetNull;
+
+ </blockquete>
+
+- Uma garantia, caso seja necessario, define o minimo do varchar.
+
+<blockquete>
+
+        foreach (var property in modelBuilder.Model.GetEntityTypes()
+            .SelectMany(e => e.GetProperties()
+                .Where(p => p.ClrType == typeof(string))))
+            property.SetColumnType("varchar(100)");
+
+</blockquete>
+
+### Configuração do contexto na StratUp
+
+- Cria uma configuração do contexto na StratUp
+
+ <blockquete>
+
+    services.AddDbContext<MeuDbContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection")));
+
+ </blockquete>
+ 
+-Executa o comando para gerar a Migração
+
+ <blockquete>
+
+        Add-Migration Initial -Verbose -Context MeuDbContext
+
+ </blockquete>
+ 
+-
+
+
+ <blockquete>
+ </blockquete>
+ 
+
+-
+
+-
+
+-
+
+-
+
+
+
+
+
+
+# Acessando o banco via repositórios
+
+# Mepeando as entidades em ViewModels com Automapper
+
+# Scaffolding das Controllers e Views
+
+# Customização das Views
  
  - 
 
