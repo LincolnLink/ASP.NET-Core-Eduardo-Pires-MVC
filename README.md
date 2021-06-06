@@ -2067,6 +2067,8 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
 </blockquete>
 
+- Faz a referencia da aplicação ao projeto Data de banco.
+
 ### Configuração do contexto na StratUp
 
 - Cria uma configuração do contexto na StratUp
@@ -2087,16 +2089,198 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  </blockquete>
  
--
+- instala o pacote
 
+ <blockquete>
+
+    Install-Package Microsoft.EntityFrameworkCore.SqlServer -Version 3.1.15
+
+ </blockquete>
+ 
+- Gera um Script-Migration em SQL, e salva na pasta do sql, para ter o codigo do sql.
+
+ <blockquete>
+
+        Script-Migration -Context MeuDbContext
+
+ </blockquete>
+
+- Cria as tabelas
+
+
+ <blockquete>
+
+    Update-Database -Context MeuDbContext
+ 
+ </blockquete>
+
+# Acessando o banco via repositórios
+
+### Interface base
+
+ - Cria uma interface chamada "IRepository" que recebe uma entidade usando o <T>, T representa generico.
+
+ - Ela herda de IDisposable, sendo que todo "IDisposable" tem que ter o tipo Entity, que é uma classe
+ que gera um id do tipo Guid.
+
+ - A interface IDisposable, ela libera espaço de memoria.
+
+ <blockquete>
+
+        public interface IRepository<T> : IDisposable where T : Entity
+        {
+            Task Adicionar(T entity);
+
+            Task<T> ObterPorId(Guid id);
+
+            Task<List<T>> ObterTodos();
+
+            Task Atualizar(T Obj);
+
+            Task Remover(Guid id);
+
+            Task<IEnumerable<T>> Buscar(Expression<Func<T, bool>> predicate);
+        }
+
+ </blockquete>
+
+ - Todo método vai ser asyncrono, por isso se bota o Task.
+
+ - Quando tem apenas Task quer dizer que não retorna nada (void).
+
+ - Expression: siginifica uma expressão LAMBDA, que trabalha com uma função,
+   que compara a minha entidade com alguma coisa(predicate) des que ela retorna um bool.
+ 
+ ### Criando Interface para cada entidade do sistema.
+
+ - Define mais indentidades de métodos
+
+ <blockquete>
+
+        public interface IProdutoRepository : IRepository<Produto>
+        {
+            Task<IEnumerable<Produto>> ObterProdutosPorFornecedor(Guid fornecedorId);
+
+            Task<IEnumerable<Produto>> ObterProdutosFornecedores();
+
+            Task<Produto> ObterProdutoFornecedor(Guid id);
+        }
+
+ </blockquete>
+
+ ### Impelmentando a interface base
+
+ - Percebe as mudanças de stado, retorna as mudanças com mais performace.
+ - Deve sempre usar o await, para receber o valor do banco.
+ - Declara alguns métodos como "virtual" para poder fazer um overaid nele.
+
+ <blockquete>
+  
+    public abstract class Repository<T> : IRepository<T> where T : Entity, new()
+    {
+        protected readonly MeuDbContext Db;
+        protected readonly DbSet<T> DbSet;
+
+      
+        public async Task<IEnumerable<T>> Buscar(Expression<Func<T, bool>> predicate)
+        {          
+            return await DbSet.AsNoTracking().Where(predicate).ToListAsync();
+        }     
+
+        public async Task<T> ObterPorId(Guid id)
+        {
+            return await DbSet.FindAsync(id);
+        }
+
+        public async Task<List<T>> ObterTodos()
+        {
+            return await DbSet.ToListAsync();
+        }
+
+        public async Task Adicionar(T entity)
+        {
+            DbSet.Add(entity);
+            await SaveChanges();
+        }
+
+        public async Task Atualizar(T entity)
+        {
+            DbSet.Update(entity);
+            await SaveChanges();
+        }
+
+        public async Task Remover(Guid id)
+        {            
+            DbSet.Remove(new T { Id = id });
+            await SaveChanges();
+        }
+
+        /// <summary>
+        /// Salva no banco do contexto.
+        /// Caso tenha algum tratamento, faça em apenas um método.
+        /// </summary>        
+        public async Task<int> SaveChanges()
+        {
+            return await Db.SaveChangesAsync();
+        }
+
+        public void Dispose()
+        {
+            Db?.Dispose();
+        }
+    }
+
+ </blockquete>
+
+ ### Implementando as interface das entidades
+
+ - Exemplo do repositorio de produto, sendo implementado.
+
+ - Herda a implementação do repositorio base, e implementa a interface do produto, porq tem métodos proprios.
+
+ <blockquete>
+
+
+        public class ProdutoRepository : Repository<Produto>, IProdutoRepository
+        {
+
+            public ProdutoRepository(MeuDbContext context) : base(context){}
+
+            public async Task<Produto> ObterProdutoFornecedor(Guid id)
+            {
+                // Include: é para incluir uma tabela na consulta.
+                // Faz um inerJoin
+                return await Db.Produtos.AsNoTracking()
+                    .Include(f => f.Fornecedor)
+                    .FirstOrDefaultAsync(p => p.Id == id);
+            }
+
+            public async Task<IEnumerable<Produto>> ObterProdutosFornecedores()
+            {
+                // Pega todos os produtos que aquele fornecedor tem vinculo,
+                // retorna uma lista ordenada.
+                return await Db.Produtos.AsNoTracking()
+                    .Include(f => f.Fornecedor)
+                    .OrderBy(p => p.Nome).ToListAsync();
+            }
+
+            public async Task<IEnumerable<Produto>> ObterProdutosPorFornecedor(Guid fornecedorId)
+            {
+                return await Buscar(p => p.FornecedorId == fornecedorId);
+            }
+        }
+
+ </blockquete>
+ 
+# Mapeando as entidades em ViewModels com Automapper
+
+ - 
+ 
+ - 
 
  <blockquete>
  </blockquete>
  
-
--
-
--
 
 -
 
