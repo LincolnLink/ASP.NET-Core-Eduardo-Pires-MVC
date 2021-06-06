@@ -45,6 +45,8 @@ namespace DevIO.App
             services.AddControllersWithViews();
             services.AddRazorPages();
 
+            // Configurando o automapper, informa o assemble.
+            services.AddAutoMapper(typeof(Startup));
 
             //Injeção de dependencia
             services.AddScoped<MeuDbContext>();
