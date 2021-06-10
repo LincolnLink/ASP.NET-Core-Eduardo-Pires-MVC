@@ -7,8 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 
-
-
 namespace AspNetCoreIdentity
 {
     public class Startup
@@ -23,6 +21,7 @@ namespace AspNetCoreIdentity
                 .AddJsonFile(path: $"appsettings.{hostEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
+            // Se for um ambiente de desenvolvimento, use os dados da minha maquina.
             if (hostEnvironment.IsProduction())
             {
                 builder.AddUserSecrets<Startup>();

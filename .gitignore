@@ -351,3 +351,18 @@ MigrationBackup/
 
 .vscode
 
+
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.json
+
+../../appsettings.Development.json
+../../appsettings.Production.json
+../../appsettings.Staging.json
+../../appsettings.json
+
+AspNetCoreIdentity/AspNetCoreIdentity/appsettings.Development.json
+AspNetCoreIdentity/AspNetCoreIdentity/appsettings.Production.json
+AspNetCoreIdentity/AspNetCoreIdentity/appsettings.Staging.json
+AspNetCoreIdentity/AspNetCoreIdentity/appsettings.json

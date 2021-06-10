@@ -1934,6 +1934,41 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
 # Protegendo dados com User Secrets.
 
+ - Informa pro sistema que quando o ambiente for de produção, 
+ vai pegar a conectionsString de um outro lugar.
+
+ - Essa condição é colocada no StratUp.
+
+  <blockquete>
+
+          if (hostEnvironment.IsProduction())
+          {
+            builder.AddUserSecrets<Startup>();
+          }
+
+  </blockquete>
+
+ - Para criar um "User Secret", deve apertar com o botão direito do mouse no projeto, 
+ e escolher "Manager User secret" ou "Gerenciar Segredos do Usuario"
+
+ - Esse usuario é o mesmo usuario do windows da sua maquina, no caso só funciona na sua maquina.
+
+ - No arquivo copia e cola a sua conecctionsString!
+
+<blockquete>
+
+        "ConnectionStrings": {
+        "AspNetCoreIdentityContextConnection": "Server=(localdb)\\mssqllocaldb;Database=AspNetCoreIdentity;Trusted_Connection=True;MultipleActiveResultSets=true"
+        }
+
+</blockquete>
+
+ - 
+
+ -
+
+ -
+
 # Tratamento de erros.
 
 # Realizando o Log de tudo.
