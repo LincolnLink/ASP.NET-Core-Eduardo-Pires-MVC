@@ -64,7 +64,8 @@ namespace AspNetCoreIdentity.Extensions
             if(!CustomAuthorization.ValidarClaimsUsuario(context.HttpContext, _claim.Type, _claim.Value))
             {
                 // Se ele não passar na validação vai da acesso negado.
-                context.Result = new ForbidResult();
+                //context.Result = new ForbidResult();
+                context.Result = new StatusCodeResult(statusCode:403);
             }
         }
     }

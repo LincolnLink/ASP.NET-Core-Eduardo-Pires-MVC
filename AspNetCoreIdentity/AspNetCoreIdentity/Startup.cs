@@ -1,8 +1,6 @@
 using AspNetCoreIdentity.Config;
-using AspNetCoreIdentity.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -31,8 +29,6 @@ namespace AspNetCoreIdentity
             Configuration = builder.Build();
         }
 
-       
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -55,22 +51,29 @@ namespace AspNetCoreIdentity
         {
             if (env.IsDevelopment())
             {
+                // retorna informações do erro, caso tenha algum.
+                // Caso o ambiente seja de desenvolvimento.
                 app.UseDeveloperExceptionPage();
 
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
-            }
-            app.UseStaticFiles();
+                /* Se não, encaminha para uma view de erro!*/
+                /* app.UseExceptionHandler("/Home/Error");*/
+                app.UseExceptionHandler("/erro/500");
+                app.UseStatusCodePagesWithRedirects("/erro/{0}");
+                app.UseHsts();
 
+                
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
             app.UseRouting();
 
             // Para o Identity funcionar!
             app.UseAuthentication();
-
             app.UseAuthorization();
-
 
             app.UseEndpoints(endpoints =>
             {

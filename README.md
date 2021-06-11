@@ -300,18 +300,18 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
 
  - Required: define que é obrigatorio e pode definir uma mensagem de erro.
 
- <blockquete>
+<blockquete>
     [Required(ErrorMessage = "O campo Título é obrigatório")]
- </blockquete>
+</blockquete>
 
  - stringLength: limites de caracteres
 
- <blockquete>
+<blockquete>
     [StringLength(30,MinimumLength = 3)]
 
     [StringLength(30,MinimumLength = 3, ErrorMessage = "" +
             "O maximo de caracteres é 30 e o minimo é 3")]
- </blockquete>
+</blockquete>
 
 - DataType: Validando data
 
@@ -558,19 +558,19 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - ViewData: é aonde fica dados temporarios na memoria, e o titulo é um index, aonde você pode resgatar os valores.
 
- <blockquete>
+<blockquete>
  @{ 
     ViewData["Title"] = "Adicionar Novo Filme";
  }
     
     <h1>@ViewData["Title"]</h1>
- </blockquete>
+</blockquete>
 
  - Para poder usar o valor deve-se por @, para ele não interpretar como texto e sim como valor.
 
  - Cria o primeiro formulario.
 
- <blockquete>
+<blockquete>
 
     <div class="row">
         <div class="col-md-4">
@@ -584,11 +584,11 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
             </form>
         </div>
     </div>
- </blockquete>
+</blockquete>
 
  - Cria um controller com nome de "Filmes"
 
- <blockquete>
+<blockquete>
 
     public class Filmes : Controller
     {
@@ -598,15 +598,15 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
             return View();
         }
     }
- </blockquete>
+</blockquete>
 
  - Na view Layout, bota uma referencia da controller Filmes
 
- <blockquete>
+<blockquete>
     < li class="nav-item">
         < a class="nav-link text-dark" asp-area="" asp-controller="Filmes" asp-action="Adicionar">Filmes</>
     < /li>
- </blockquete>
+</blockquete>
 
 
 # Validações de Formulário
@@ -615,9 +615,9 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Em cada campo adiciona um span com o codigo asp fazendo referencia ao atributo da model
 
- <blockquete>
+<blockquete>
   < span asp-validation-for="Titulo" class="text-danger"></>
- </blockquete>
+</blockquete>
 
  - Para mostrar um resumo das validações, se usa um validacionSumer
 
@@ -631,7 +631,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
     - Com isso carrega toda regra para validar, usando o jQuery, a mensagem fica em portugues !
 
-    <blockquete>
+<blockquete>
                     
         @section Script{ 
 
@@ -640,7 +640,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
              }
         }
 
-    </blockquete>
+</blockquete>
 
 
 # Ganhe tempo. Utilize Scaffold
@@ -698,7 +698,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
 
 
- <blockquete>
+<blockquete>
             // MODELO NOVO
             app.UseRouting();
 
@@ -724,7 +724,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
             // app.UseMvc();
 
   
- </blockquete>
+</blockquete>
  
     - Cria uma controller do zero na pasta controllers
 
@@ -738,11 +738,11 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
     - Cria um arquivo chamado "_ViewStart" e define o layoutu padrão nela que vai ser uma outra view chamada "_Layout".
 
- <blockquete>
+<blockquete>
         @{
         Layout = "_Layout";
         }
- </blockquete>
+</blockquete>
 
  ### Fazendo o TagHelpers funcionar.
 
@@ -769,7 +769,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - A tAG "environment" define oque vai carregar em produção ou não.
  
- <blockquete>
+<blockquete>
 
     < environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.css" />
@@ -783,7 +783,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
               integrity="sha256-eSi1q2PG6J7yAaWMcrr5GrtohYChqibrV7PBE=" />
     < /environment> 
 
- </blockquete>
+</blockquete>
  
  - asp-fallback-href: caso não carrega o cdn ele vai carregar o arquivo indicado pelo " asp-fallback-href".
 
@@ -800,7 +800,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Cria um arquivo "bundlingConfig" no projeto.
  
- <blockquete>
+<blockquete>
     {
     "outputFileName": "wwwroot/css/site_bundle.min.css",
     "inputFile": [
@@ -817,7 +817,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
     ]
 
     }
- </blockquete>
+</blockquete>
 
  - Procure a aba de task runner explorer()
 
@@ -830,7 +830,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - 
 
- <blockquete>
+<blockquete>
 
     public class EmailTagHelper: TagHelper
     {
@@ -853,13 +853,13 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
         }
     }
 
- </blockquete>
+</blockquete>
     
     ### Registrando TagHelper
 
     - No arquivo _ViewImports, e bota o codigo que reconhece todas as taghelper.
 
- <blockquete> @addTagHelper "*, Dev.UI.Site" </blockquete>
+<blockquete> @addTagHelper "*, Dev.UI.Site" </blockquete>
 
     ### Recebendo valores no taghelper
 
@@ -892,24 +892,24 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
  
  - No layout define a area com "asp-area", "asp-controller" e o "asp-action" 
 
- <blockquete>
+<blockquete>
    < li class="nav-item">
         < a class="nav-link text-dark" asp-area="Produtos" asp-controller="Cadastro" asp-action="Index">Cadastro</>
     < /li>
- </blockquete>
+</blockquete>
  
  - No controller deve por o decoraito "area" 
 
- <blockquete> [Area(nameof(Produtos))] </blockquete>
+<blockquete> [Area(nameof(Produtos))] </blockquete>
 
  - Por ultimo define a area na rota pelo arquivo startUP
 
- <blockquete>
+<blockquete>
     endpoints.MapAreaControllerRoute(
                    "teste",
                    "Produtos",
                    "areas/{controller=Cadastro}/{action=Index}/{id?}");
- </blockquete>
+</blockquete>
 
  - pode por "exist" dolado de areas para verificar se ela exist!
 
@@ -918,7 +918,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
  - Pode por na pasta view da area, uma copia do arquivo "_viewStart" para exibir o manu.
  - Caso queira trocar o nome da pasta "area" deve fazer uma configuração dentro do metodo "ConfigureService" do arquivo StartUp.
 
-    <blockquete>
+<blockquete>
 
     services.Configure<RazorViewEngineOptions>(optins => {
                     optins.AreaViewLocationFormats.Clear();
@@ -927,14 +927,14 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
                     optins.AreaViewLocationFormats.Add("/View/Shared/{0}.cshtml");
                 });
 
-    </blockquete>
+</blockquete>
  ### Oque motiva a ter uma área
 
  - Configurar rotas no arquivo startUp é opcional.
 
  - Pode congiruar as rotas das areas no proprio controler.
 
-    <blockquete>
+<blockquete>
 
         [Area(nameof(Produtos))]
             [Route("produtos")]
@@ -954,7 +954,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
                 }
 
             }
-    </blockquete>
+</blockquete>
 
 # Injeção de dependência (DI)
  
@@ -976,20 +976,20 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Com o método "AddTransient" ele cria automaticamente uma instancia da classe, não deixa de criar, implementar e por a Interface.
 
- <blockquete>
+<blockquete>
 
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddTransient<IPedidoRepository, PedidoRepository>();            
     }
 
- </blockquete>
+</blockquete>
 
 # Injetando dependências no MVC
 
  - Ultilizando a Injeção de dependencia no controller.
 
- <blockquete>
+<blockquete>
 
     private readonly IPedidoRepository _pedidoRepository;
 
@@ -1004,28 +1004,28 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
             return View();
         }
- </blockquete>
+</blockquete>
  
  - Ultilizando Injeção de dependencia na View.
 
- <blockquete>
+<blockquete>
     @using Dev.UI.Site.Data
     @inject IPedidoRepository PedidoRepository
     Ola! @PedidoRepository.ObterPedido().Id; 
- </blockquete>
+</blockquete>
 
  ### sistema legado que não pode alterar o construtor.
 
  - é pissivel injetar a dependendica sem ser no construtor, injetando diretamente no método!
 
- <blockquete>
+<blockquete>
     public IActionResult Index([FromServices] IPedidoRepository _pedidoRepository)
     {
         var pedido = _pedidoRepository.ObterPedido();
 
         return View();
     }
- </blockquete>
+</blockquete>
 
 # Tipos de Ciclo de Vida
 
@@ -1055,10 +1055,10 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Inatalação manual:
  
- <blockquete> Install -pacjge Microsoft.EntityFrameworkCore </blockquete>
- <blockquete> Microsoft.EntityFrameworkCore.SqlServer </blockquete>
- <blockquete> Microsoft.EntityFrameworkCore.SqlServer.Design </blockquete>
- <blockquete> Microsoft.EntityFrameworkCore.Tools </blockquete>
+<blockquete> Install -pacjge Microsoft.EntityFrameworkCore </blockquete>
+<blockquete> Microsoft.EntityFrameworkCore.SqlServer </blockquete>
+<blockquete> Microsoft.EntityFrameworkCore.SqlServer.Design </blockquete>
+<blockquete> Microsoft.EntityFrameworkCore.Tools </blockquete>
 
 # Configurando o DbContext
 
@@ -1073,11 +1073,11 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Como o valor bota um onjeto que tem a chave "MeuDbContext", e valor "servidor\\instanciaDoservidor;BaseDeDados;informaçõesAmais"
 
- <blockquete> 
+<blockquete> 
   "ConnectionStrings": {
     "MeuDbContext":  "Server=(localdb)\\mssqllocaldb;Database=MeuBancoDoCursoAspNet;Trusted_Connection=True;MultipleActiveResultSets=true"
   }
- </blockquete>
+</blockquete>
 
  - Trusted_Connection: usuaria confiavel dentro do sql.
 
@@ -1105,13 +1105,13 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Busca um atalho para sua ConnectionString
 
- <blockquete> 
+<blockquete> 
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddDbContext<MeuDbContext>(optionsAction:options => 
                 options.UseSqlServer(Configuration.GetConnectionString(name:"MeuDbContext")));
     }   
- </blockquete>
+</blockquete>
 
  ### Arquivo meuDbContext
 
@@ -1939,14 +1939,14 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Essa condição é colocada no StratUp.
 
-  <blockquete>
+ <blockquete>
 
           if (hostEnvironment.IsProduction())
           {
             builder.AddUserSecrets<Startup>();
           }
 
-  </blockquete>
+ </blockquete>
 
  - Para criar um "User Secret", deve apertar com o botão direito do mouse no projeto, 
  e escolher "Manager User secret" ou "Gerenciar Segredos do Usuario"
@@ -1963,13 +1963,144 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
 </blockquete>
 
+# Tratamento de erros.
+
+ - Cria um erro proposital para conhecer a diferença da tela, de erro em produção para erro em desenvolvimento.
+
+ - Na StartUp existe um tratamento de erro padrão.
+
+ - app.UseDeveloperExceptionPage(): retorna informações do erro, caso tenha algum, 
+ Caso o ambiente seja de desenvolvimento. 
+
+ - Se não, encaminha para uma view de erro!
+
+<blockquete>
+
+        if (env.IsDevelopment())
+        {                
+            app.UseDeveloperExceptionPage();
+        }
+        else
+        {                
+            app.UseExceptionHandler("/Home/Error");
+        }
+
+</blockquete>
+
+ - No arquivo "ErrorViewModel" subistitua as propriedades.
+
+<blockquete>
+
+        public int ErroCode { get; set; }
+
+        public string Titulo { get; set; }
+
+        public string Mensagem { get; set; }
+
+</blockquete>
+
+ - Na view "Error.cshtml" deve trocar a mensagem de erro.
+  
+<blockquete>
+     
+        @{ 
+            if(Model == null)
+            {
+                <div>
+                    <h2>Ooops! Ocorreu um erro, mas não se preocupe, 
+                    Nosso time será avisado e iremos corrigir em breve</h2>
+                </div>
+            }
+            else
+            {
+                <h1>@Html.Raw(Model.Titulo)</h1>
+                <h2 class="text-danger">@Html.Raw(Model.Mensagem)</h2>
+            }
+        }
+ 
+</blockquete>
+
+ - Modifica a controller que faz vinculo com a tela de erro!
+
+ - E cria uma tratamento para cada tipo de erro.
+
+<blockquete>
+
+        [Route("erro/{id:length(3,3)}")]
+        public IActionResult Error(int id)
+        {
+            var modelErro = new ErrorViewModel();
+
+            if(id == 500)
+            {
+                modelErro.Mensagem = "Ocorreu um erro! Tente novamente mais tarde ou contate nosso suporte.";
+                modelErro.Titulo = "Ocorreu um erro!";
+                modelErro.ErroCode = id;
+            }
+            else if(id == 404)
+            {
+                modelErro.Mensagem = "A página que está procurando não existe! <br />Em caso de dúvidas entre em contato com nosso suporte";
+                modelErro.Titulo = "Ops! Página não encontrada.";
+                modelErro.ErroCode = id;
+            }
+            else if (id == 403)
+            {
+                modelErro.Mensagem = "Você não tem permissão para fazer isto.";
+                modelErro.Titulo = "Acesso Negativo";
+                modelErro.ErroCode = id;
+            }
+            else
+            {
+                return StatusCode(404);
+            }
+
+            //return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View("Error", modelErro);
+        } 
+
+</blockquete>
+
+ - No StartUp, modifica o tratamento.
+
+<blockquete>
+
+        if (env.IsDevelopment())
+        {
+            // retorna informações do erro, caso tenha algum.
+            // Caso o ambiente seja de desenvolvimento.
+            app.UseDeveloperExceptionPage();
+        }
+        else
+        {
+            /* Se não, encaminha para uma view de erro!*/
+            /* app.UseExceptionHandler("/Home/Error");*/
+            app.UseExceptionHandler("/erro/500");
+            app.UseStatusCodePagesWithRedirects("/erro/{0}");
+            app.UseHsts();                
+        }
+
+</blockquete>
+
+- 
+
+- 
+
+- 
+
+- 
+
+ 
+<blockquete>
+
+
+
+</blockquete>
+
  - 
 
- -
+ - 
 
- -
 
-# Tratamento de erros.
 
 # Realizando o Log de tudo.
 
@@ -2160,7 +2291,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - A interface IDisposable, ela libera espaço de memoria.
 
- <blockquete>
+<blockquete>
 
         public interface IRepository<T> : IDisposable where T : Entity
         {
@@ -2177,7 +2308,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
             Task<IEnumerable<T>> Buscar(Expression<Func<T, bool>> predicate);
         }
 
- </blockquete>
+</blockquete>
 
  - Todo método vai ser asyncrono, por isso se bota o Task.
 
@@ -2190,7 +2321,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Define mais indentidades de métodos
 
- <blockquete>
+<blockquete>
 
         public interface IProdutoRepository : IRepository<Produto>
         {
@@ -2201,7 +2332,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
             Task<Produto> ObterProdutoFornecedor(Guid id);
         }
 
- </blockquete>
+</blockquete>
 
  ### Impelmentando a interface base
 
@@ -2209,7 +2340,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
  - Deve sempre usar o await, para receber o valor do banco.
  - Declara alguns métodos como "virtual" para poder fazer um overaid nele.
 
- <blockquete>
+<blockquete>
   
     public abstract class Repository<T> : IRepository<T> where T : Entity, new()
     {
@@ -2265,7 +2396,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
         }
     }
 
- </blockquete>
+</blockquete>
 
  ### Implementando as interface das entidades
 
@@ -2273,7 +2404,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Herda a implementação do repositorio base, e implementa a interface do produto, porq tem métodos proprios.
 
- <blockquete>
+<blockquete>
 
 
         public class ProdutoRepository : Repository<Produto>, IProdutoRepository
@@ -2305,14 +2436,14 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
             }
         }
 
- </blockquete>
+</blockquete>
  
 # Mapeando as entidades em ViewModels com Automapper
 
  - Cria as ViewModel para cada entidade
  - Exemplo: 
 
- <blockquete>
+<blockquete>
 
         public class ProdutoViewModel
         {
@@ -2352,17 +2483,17 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
             public IEnumerable<FornecedorViewModel> Fornecedores { get; set; }
         }
 
- </blockquete>
+</blockquete>
  
  ### Automaper
 
  - Instala o automaper 
 
- <blockquete>
+<blockquete>
 
         Install-Package automapper.extensions.microsoft.dependencyinjection
 
- </blockquete>
+</blockquete>
  
  - Configura o automaper na startUp
 
@@ -2399,11 +2530,11 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
  -
 
  
- <blockquete>
+<blockquete>
 
 
  
- </blockquete>
+</blockquete>
  
 
  - 
