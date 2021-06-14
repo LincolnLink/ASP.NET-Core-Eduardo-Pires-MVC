@@ -269,6 +269,7 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
         return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
 
     }
+
 </blockquete>
 
 # Models
@@ -301,21 +302,26 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
  - Required: define que é obrigatorio e pode definir uma mensagem de erro.
 
 <blockquete>
+
     [Required(ErrorMessage = "O campo Título é obrigatório")]
+
 </blockquete>
 
  - stringLength: limites de caracteres
 
 <blockquete>
+
     [StringLength(30,MinimumLength = 3)]
 
     [StringLength(30,MinimumLength = 3, ErrorMessage = "" +
             "O maximo de caracteres é 30 e o minimo é 3")]
+
 </blockquete>
 
 - DataType: Validando data
 
 <blockquete>
+
  [DataType(DataType.DateTime, ErrorMessageResourceName = "Data em formato incorreto")]      
 
 </blockquete>
@@ -323,11 +329,14 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
 - Display: define o nome que aparece na tela
 
 <blockquete>
+
     [Display(Name = "Data de Lançamento")]
+
 </blockquete>
 
 - RegularExpression: 
 <blockquete>
+
     [RegularExpression(@"^[A-Z]+[a-zA-Z\u00C0-\u00FF""'\w-]*$")]
 
     [RegularExpression(@"^[0-5]*$", ErrorMessage ="Somente números de 0 á 5")]
@@ -336,25 +345,34 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
 
 - Range
 <blockquete>
+
  [Range(1,1000, ErrorMessage ="Minimo 1 a 1000")]
+
 </blockquete>
 
 - Column: como vai ser a coluna do banco de dados, dessa propriedade.
+
 <blockquete>
+
 [Column(TypeName = "decimal(18,2)")]
+
 </blockquete>
 
 - Key: informa que é uma chave primaria.
 
 <blockquete>
+
 [Key]
+
 </blockquete>
 
 - SobreCargas: pode criar duas validações no mesmo [], mais de uma anotação é passada na mesma linha.
 
 <blockquete>
+
 [StringLength(30, ErrorMessage = "Maximo 30 caracteres"),
         Required(ErrorMessage = "O campo Título é obrigatório")]
+
 </blockquete>
 
 
@@ -365,10 +383,13 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
  - Redirecionando rotas com 
 
 <blockquete>
+
     return RedirectToAction("Privacy", filme);
+
 </blockquete>
 
 <blockquete>
+
             [Route("")]
             [Route("inicio")]
             [Route("inicio/{id:int}/{categorias:guid}")]
@@ -402,6 +423,7 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
                     Console.WriteLine(error.ErrorMessage);
                 }
             }
+
 </blockquete>
 
 # Apresentando o Razor
@@ -420,8 +442,10 @@ JsonResult, PartialViewResult, ViewResult, ViewComponentResult, etc
 - A grande melhoria nos Tag Helpers é a nova sintaxe muito mais agradável e próxima do HTML
 
 <blockquete>
+
  < label asp-for="password" class="..">
     < span asp-validation-for="password">
+
 </blockquete>
 
 # Views de configuração
@@ -467,7 +491,11 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
 - Forma atual de chamar um "Parcial view"
 
-<blockquete> < partial name="_AvisoGeral" /> </blockquete>
+<blockquete> 
+
+< partial name="_AvisoGeral" />
+
+</blockquete>
 
 - Chamada asyncrona
 
@@ -493,7 +521,8 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
     - Bote um decoreito com um nome "[ViewComponent(Name = "Carrinho")]".
 
-    <blockquete>
+<blockquete>
+
         [ViewComponent(Name = "Carrinho")]
         public class CarrinhoViewComponent : ViewComponent
         {
@@ -509,7 +538,8 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
                 return View(itensCarrinho);
             }
         } 
-    </blockquete>
+
+</blockquete>
 
  - Criando uma View para o ViewComponent
 
@@ -525,27 +555,31 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
     - "@Model" com "M" está exibindo o valor.
 
-    <blockquete>
+<blockquete>
 
         @model int
 
         <span class="fade fa-shopping-cart fa-2x"> @Model </span>
 
-    </blockquete>
+</blockquete>
 
  - Como chamar o seu viewComponent
 
     - Usando uma tagHelp chamada "vc"
 
-    <blockquete>
+<blockquete>
+
       <vc:Carrinho></vc:Carrinho>
-    </blockquete>
+
+</blockquete>
 
     - Porm deve configurar essa taghelp no "ViewImport"
 
-    <blockquete>
+<blockquete>
+
         @addTagHelper "*, MinhaDemoMvc"
-    </blockquete>
+
+</blockquete>
 
 
  - View Components e Partial Views são recursos diferentes para atender necessidades diferentes.
@@ -2210,17 +2244,79 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  -
 
+# Trabalhando com Filtros. (pipe)
 
+- Um filtro pode ser confundido com um Middleware.
 
-# Trabalhando com Filtros.
+- Link recomendavel : https://docs.microsoft.com/pt-br/aspnet/core/mvc/controllers/filters?view=aspnetcore-3.1
+
+- Existe filtros: autorização(já criamos), recursos, ação, exceção, resultado.
+
+- Todos eles estão descrito no link da documentação.
+
+- Nesse exemplo será mostrado um filtro de ação!
+
+### exemplo na pratica
+
+- Para isso é preciso criar um arquivo chamado "AuditoriaFilter", e implementar uma interface chamada "IActionFilter".
+
+- Vamos implementar apenas o método "OnActionExecuted", no método construtor cria uma injeta o logger da aula passada.
+
+- no "ActionExecutingContext" tem todas as informações do http, como o usuario,
+então com isso cria uma logica para verificar se o urusrio está logado ou não.
+
+- Cria uma variavel, e bota a informação de quem logou, com o kisslog armazena a informação da variavel.
+  
+<blockquete>
+
+         public void OnActionExecuting(ActionExecutingContext context)
+         {
+                if(context.HttpContext.User.Identity.IsAuthenticated)
+                {
+                    var message = context.HttpContext.User.Identity.Name + " Acessou " +
+                        context.HttpContext.Request.GetDisplayUrl();
+
+                    _logger.Info(message);
+                }
+         }
+
+</blockquete>
+
+- Para ser um filtro Global, precisa ser registrado no StartUp.
+
+- Não tem como instanciar a classe porq ela recebe uma injeção de dependencia.
+
+- Então é criada uma injeção de dependencia!
+  
+<blockquete>
+        
+        services.AddControllersWithViews(options => 
+        {
+            options.Filters.Add(filterType:typeof(AuditoriaFilter));
+
+        });
+
+</blockquete>
+
+- Injeção de dependencia.
+
+<blockquete>
+
+         services.AddScoped<AuditoriaFilter>();
+
+</blockquete>
+
+- Ver os outros tipos de filtros do link da documentação.
 
 # Desenvolvendo uma aplicação MVC Core completa.
 
-# Objetivos do módulo (Explicando Projeto)
+### Objetivos do módulo (Explicando Projeto)
 
-# Começando da forma fácil
+- Apenas explica o projeto.
 
-# Conclusão da forma fácil
+### Começando da forma fácil (Cria o projeto depois)
+
+### Conclusão da forma fácil
 
 # Setup da aplicação completa (Projeto: MinhaAppMvcCompleta)
 
@@ -2240,15 +2336,15 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Instala o pacote do EF
 
- <blockquete>
+<blockquete>
 
     Install-Package Microsoft.EntityFrameworkCore -Version 3.1.15
 
- </blockquete>
+</blockquete>
 
  - Cria a referencia com as modules, e defina o contexto. 
 
-  <blockquete>
+<blockquete>
 
         public class MeuDbContext : DbContext
         {
@@ -2278,7 +2374,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
 - Cria o mapeamento das Modules
 
- <blockquete>
+<blockquete>
 
         public class ProdutoMapping : IEntityTypeConfiguration<Produto>
         {
@@ -2307,17 +2403,17 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
             }
         }
 
- </blockquete>
+</blockquete>
 
  - Cria o vinculo do mapeamento com o contexto.
  - Comando que pega o mapeamento definido na pasta Mappings.
  - Reflexion não é muito recomendado mas vai fazer uma vez só.
  
- <blockquete>
+<blockquete>
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(MeuDbContext).Assembly);
 
- </blockquete>
+</blockquete>
 
 - Desativando o cascaiter, impede que a classe ao ser excluida, seja excluida junto!
 - Faz uma pesquisa de relações dentro do modelBuild, pegando o tipo das entidades.
@@ -2328,7 +2424,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
         foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
                 relationship.DeleteBehavior = DeleteBehavior.ClientSetNull;
 
- </blockquete>
+</blockquete>
 
 - Uma garantia, caso seja necessario, define o minimo do varchar.
 
@@ -2347,46 +2443,46 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
 - Cria uma configuração do contexto na StratUp
 
- <blockquete>
+<blockquete>
 
     services.AddDbContext<MeuDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
 
- </blockquete>
+</blockquete>
  
 -Executa o comando para gerar a Migração
 
- <blockquete>
+<blockquete>
 
         Add-Migration Initial -Verbose -Context MeuDbContext
 
- </blockquete>
+</blockquete>
  
 - instala o pacote
 
- <blockquete>
+<blockquete>
 
     Install-Package Microsoft.EntityFrameworkCore.SqlServer -Version 3.1.15
 
- </blockquete>
+</blockquete>
  
 - Gera um Script-Migration em SQL, e salva na pasta do sql, para ter o codigo do sql.
 
- <blockquete>
+<blockquete>
 
         Script-Migration -Context MeuDbContext
 
- </blockquete>
+</blockquete>
 
 - Cria as tabelas
 
 
- <blockquete>
+<blockquete>
 
     Update-Database -Context MeuDbContext
  
- </blockquete>
+</blockquete>
 
 # Acessando o banco via repositórios
 

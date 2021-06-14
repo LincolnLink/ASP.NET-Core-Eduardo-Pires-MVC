@@ -1,4 +1,5 @@
 using AspNetCoreIdentity.Config;
+using AspNetCoreIdentity.Extensions;
 using KissLog.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,7 +35,12 @@ namespace AspNetCoreIdentity
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllersWithViews(options => 
+            {
+                // É possivel fazer isso porq tem uma injeção de dependencia.
+                options.Filters.Add(filterType:typeof(AuditoriaFilter));
+
+            });
 
             // Configuração do Identity
             services.AddIdentityConfig(Configuration);
