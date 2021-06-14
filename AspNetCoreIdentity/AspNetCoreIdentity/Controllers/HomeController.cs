@@ -2,42 +2,53 @@
 using AspNetCoreIdentity.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using KissLog;
 
 namespace AspNetCoreIdentity.Controllers
 {
     [Authorize] //Só tem acesso usuario que está logado
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger _logger;
+        //private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        //ILogger<HomeController> logger
+        public HomeController(ILogger logger)
         {
             _logger = logger;
         }
 
-
-
         [AllowAnonymous] // Uma exceção, mesmo com bloqueio de autenticação, usuarios não logado consegue ver
         public IActionResult Index()
         {
+            _logger.Trace(message:"Usuario acessou a homer");
             return View();
         }
         
         public IActionResult Privacy()
         {
-            throw new Exception("Error");
-            //return View();
+            //throw new Exception("Error");
+            return View();
         }
 
         [Authorize(Roles = "Admin")]
         public IActionResult Secret()
         {
+
+            /*try
+            {
+                throw new Exception("Aconteceu algo horrivel");
+            }
+            catch(Exception e)
+            {
+                _logger.Error(e);
+                throw;
+            */
             return View();
         }
 

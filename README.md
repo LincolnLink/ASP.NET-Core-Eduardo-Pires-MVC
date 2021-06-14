@@ -2081,28 +2081,136 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
 </blockquete>
 
-- 
+# Realizando o Log de tudo.
 
-- 
+- Cria uma controller chamada "Teste".
 
-- 
+- Injeta a interface "ILogger" no construtor,  
 
-- 
+- No arquivo "AppSettings.json" você configura o Logger.
 
- 
+- Chama o método que declara um erro para o loger para testar. 
+
+- No console ou no output, informa esse log.
+
 <blockquete>
 
+            public IActionResult Index()
+            {
+                _logger.LogError("Esse erro Aconteceu!");
 
+                return View();
+            }
 
 </blockquete>
 
- - 
+- É nessesario uma ferramenta de 3° para realizar o armazenamento dos log .
 
- - 
+- KissLog.net é a ferramenta recomendada para fazer isso.
+
+- No arquivo de "DependencyInjectionConfig" que fica na pasta "Config", deve por a injeção de dependencia do kisslog
+ 
+<blockquete>
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<ILogger>((context) =>
+            {
+                return Logger.Factory.Get();
+            });
+            services.AddLogging(logging =>
+            {
+                logging.AddKissLog();
+            });
+
+</blockquete>
+
+ - No StartUp bota a confgiração do kisslog 
+
+<blockquete>
+
+        app.UseKissLogMiddleware(options => {
+                ConfigureKissLog(options);
+            });
+
+</blockquete>
+
+ - Cria um arquivo chamado "LogConfig" na pasta "Config".
+
+ - Para isolar o condigo de configuração do log.
+
+ - Esse codigo foi passado pela documentação do KissLog.
+
+ - https://kisslog.net/Account/ApplicationConfiguration?applicationId=7a7704e7-1a95-42dc-ba20-62249b91a261
+
+ <blockquete>
+
+        public class LogConfig
+        {
+            public static void ConfigureKissLog(IOptionsBuilder options, IConfiguration Configuration)
+            {
+                // optional KissLog configuration
+                options.Options
+                    .AppendExceptionDetails((Exception ex) =>
+                    {
+                        StringBuilder sb = new StringBuilder();
+
+                        if (ex is System.NullReferenceException nullRefException)
+                        {
+                            sb.AppendLine("Important: check for null references");
+                        }
+
+                        return sb.ToString();
+                    });
+
+                // KissLog internal logs
+                options.InternalLog = (message) =>
+                {
+                    Debug.WriteLine(message);
+                };
+
+                RegisterKissLogListeners(options, Configuration);
+            }
 
 
+            public static void RegisterKissLogListeners(IOptionsBuilder options, IConfiguration Configuration)
+            {
+                // multiple listeners can be registered using options.Listeners.Add() method
+ 
+                // register KissLog.net cloud listener
+                options.Listeners.Add(new RequestLogsApiListener(new Application(
+                    Configuration["KissLog.OrganizationId"],    //  "16bf8aa9-d986-44fc-815a-4a82a8012261"
+                    Configuration["KissLog.ApplicationId"])     //  "7a7704e7-1a95-42dc-ba20-62249b91a261"
+                )
+                {
+                    ApiUrl = Configuration["KissLog.ApiUrl"]    //  "https://api.kisslog.net"
+                });
+            }
+        }
 
-# Realizando o Log de tudo.
+ </blockquete>
+
+ - Uma das formas de testa o erro é usando esse codigo na controller.
+  
+<blockquete>
+
+            try
+            {
+                throw new Exception("Aconteceu algo horrivel");
+            }
+            catch(Exception e)
+            {
+                _logger.Error(e);
+                throw;
+            }
+            return View();
+
+</blockquete>
+
+ - O log vai receber todos os erros e salvar.
+
+ -
+
+
 
 # Trabalhando com Filtros.
 

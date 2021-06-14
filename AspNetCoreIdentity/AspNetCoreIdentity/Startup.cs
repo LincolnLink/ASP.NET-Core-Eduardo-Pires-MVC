@@ -1,8 +1,10 @@
 using AspNetCoreIdentity.Config;
+using KissLog.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 
 
 namespace AspNetCoreIdentity
@@ -62,9 +64,7 @@ namespace AspNetCoreIdentity
                 /* app.UseExceptionHandler("/Home/Error");*/
                 app.UseExceptionHandler("/erro/500");
                 app.UseStatusCodePagesWithRedirects("/erro/{0}");
-                app.UseHsts();
-
-                
+                app.UseHsts();                
             }
 
             app.UseHttpsRedirection();
@@ -75,6 +75,11 @@ namespace AspNetCoreIdentity
             app.UseAuthentication();
             app.UseAuthorization();
 
+            //KissLog
+            app.UseKissLogMiddleware(options => {
+                LogConfig.ConfigureKissLog(options, Configuration);
+            });
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -84,6 +89,7 @@ namespace AspNetCoreIdentity
                 // Para as rotas com pages funcionar
                 endpoints.MapRazorPages();
             });
+            
         }
     }
 }
