@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using DevIO.App.Extensions;
-using DevIO.Business.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace DevIO.App.ViewModels
@@ -31,7 +29,7 @@ namespace DevIO.App.ViewModels
 
         public string Imagem { get; set; }
 
-        [Moeda]
+        //[Moeda]
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         public decimal Valor { get; set; }
 
