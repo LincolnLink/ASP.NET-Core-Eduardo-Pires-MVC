@@ -2795,34 +2795,179 @@ então com isso cria uma logica para verificar se o urusrio está logado ou não
 
     }
 
- </blockquete>
+</blockquete>
 
 # Scaffolding das Controllers e Views
 
-
- - 
-
- -
-
- 
+ - Usa o Scaffolding para cria um controller mvc entity framework.
+ - Antes de cria, deve primeiro comentar a linha do arquivo model que tenha o tipo "IFormFile".
+ - Escolhe uma viewModel, depois um contexto, verifica o nome da controller.
+ - É gerado as view automaticamente.
+ - Injeta no controller o autoMapper, e o contexto.
+  
 <blockquete>
 
+            private readonly IFornecedorRepository _IFornecedorRepository;
+            private readonly IMapper _mapper;
 
+            public FornecedoresController(IFornecedorRepository fornecedorRepository,
+                IMapper mapper)
+            {
+                _IFornecedorRepository = fornecedorRepository;
+                _mapper = mapper;
+            }
  
 </blockquete>
 
-
- -
-
+ - Com isso pode começar a fazer as consultas.
+ - É necessario converter o objeto retornado do repositorio, para o tipo viewModel.
+ - Se faz isso com autoMapper, é preciso converter porq a view trabalha com o objeto "FornecedorViewModel"
  
 <blockquete>
 
-
- 
+        public async Task<IActionResult> Index()
+        {
+            return View( _mapper.Map<IEnumerable<FornecedorViewModel>>(await _IFornecedorRepository.ObterTodos()));
+        }
+        
 </blockquete>
- 
 
- - 
+ - Com isso você deixa seu codigo mais limpo.
+
+ - GetAll 
+
+<blockquete>
+
+        // GET: Fornecedores
+        public async Task<IActionResult> Index()
+        {
+            return View( _mapper.Map<IEnumerable<FornecedorViewModel>>(await _FornecedorRepository.ObterTodos()));
+        }
+
+</blockquete>
+
+ - GetById 
+
+<blockquete>
+
+        // GET: Fornecedores/Details/5
+        public async Task<IActionResult> Details(Guid id)
+        { 
+            var fornecedorViewModel = await ObterFornecedorEndereco(id);
+             
+            if (fornecedorViewModel == null)
+            {
+                return NotFound();
+            }
+
+            return View(fornecedorViewModel);
+        }
+
+</blockquete>
+
+- O Creat deve ter dois metodos, um get e outro post.
+
+<blockquete>
+
+        // GET: Fornecedores/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Fornecedores/Create       
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(FornecedorViewModel fornecedorViewModel)
+        {
+            if (!ModelState.IsValid) return View(fornecedorViewModel);
+
+            var fornecedor = _mapper.Map<Fornecedor>(fornecedorViewModel);
+            await _FornecedorRepository.Adicionar(fornecedor);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+</blockquete>
+
+- O adit a mesma coisa, usa um get e um post.
+
+<blockquete>
+
+        // GET: Fornecedores/Edit/5
+        public async Task<IActionResult> Edit(Guid id)
+        {   
+            var fornecedorViewModel = await ObterFornecedorProdutosEndereco(id);
+
+            if (fornecedorViewModel == null)
+            {
+                return NotFound();
+            }
+            return View(fornecedorViewModel);
+        }
+
+        // POST: Fornecedores/Edit/5        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, FornecedorViewModel fornecedorViewModel)
+        {
+            if (id != fornecedorViewModel.Id) return NotFound();
+
+            if (!ModelState.IsValid) return View(fornecedorViewModel);
+
+            var fornecedor = _mapper.Map<Fornecedor>(fornecedorViewModel);
+            await _FornecedorRepository.Atualizar(fornecedor);
+
+            return RedirectToAction(actionName: "Index");            
+        }
+
+</blockquete>
+
+- Delete usa um get e um post.
+
+<blockquete>
+
+        // GET: Fornecedores/Delete/5
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var fornecedorViewModel = await ObterFornecedorEndereco(id);
+               
+            if (fornecedorViewModel == null)
+            {
+                return NotFound();
+            }
+
+            return View(fornecedorViewModel);
+        }
+
+        // POST: Fornecedores/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            var fornecedorViewModel = await ObterFornecedorEndereco(id);
+
+            if (fornecedorViewModel == null) return NotFound();
+
+            await _FornecedorRepository.Remover(id);
+
+            return RedirectToAction(actionName: "Index");
+        }
+
+</blockquete>
+
+- Cria uma controller para o produto.
+
+ <blockquete>
+ </blockquete>
+
+ 
+ <blockquete>
+ </blockquete>
+
+ 
+ <blockquete>
+ </blockquete>
 
 # Customização das Views
  
