@@ -6,6 +6,8 @@ using DevIO.App.ViewModels;
 using DevIO.Business.Interfaces;
 using AutoMapper;
 using DevIO.Business.Models;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace DevIO.App.Controllers
 {
@@ -64,10 +66,19 @@ namespace DevIO.App.Controllers
             // Se a ModelState não for valida recarrega a pagina.
             if (!ModelState.IsValid) return View(produtoViewModel);
 
-            // Usao repositorio para adicionar o produto convertido.
+            //upload do arquivo
+            var imgPrefixo = Guid.NewGuid() + "_";
+            if(!await UploadArquivo(produtoViewModel.ImagemUpload, imgPrefixo))
+            {
+                return View(produtoViewModel);
+            }
+
+            produtoViewModel.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
+
+            // Uso repositorio para adicionar o produto convertido.
             await _produtoRepository.Adicionar(_mapper.Map<Produto>(produtoViewModel));
 
-            return View(produtoViewModel);
+            return RedirectToAction(actionName: "Index");
         }
 
         // GET: Produtos/Edit/5
@@ -144,6 +155,30 @@ namespace DevIO.App.Controllers
         {            
             produto.Fornecedores = _mapper.Map<IEnumerable<FornecedorViewModel>>(await _fornecedorRepository.ObterTodos());
             return produto;
+        }
+
+        private async Task<bool> UploadArquivo(IFormFile arquivo, string imgPrefixo)
+        {
+            // Verifica se existe arquivo
+            if (arquivo.Length <= 0) return false;
+
+            // Cria um caminho
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/imagens", imgPrefixo + arquivo.FileName);
+        
+            // Verifica se o arquivo é repetido.
+            if(System.IO.File.Exists(path))
+            {
+                ModelState.AddModelError(key: string.Empty, errorMessage: "Já existe um arquivo com este nome!");
+                return false;
+            }
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                // Faz a gravação no disco.
+                await arquivo.CopyToAsync(stream);
+            }
+
+            return true;
         }
 
     }

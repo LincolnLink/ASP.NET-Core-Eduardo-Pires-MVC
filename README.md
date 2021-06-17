@@ -3030,29 +3030,86 @@ então com isso cria uma logica para verificar se o urusrio está logado ou não
 
 # Upload de imagem do produto
 
- - 
+ - Cria um método que faz o upload da imagem antes de salva no banco.
 
- -
+<blockquete>
 
- - 
+            private async Task<bool> UploadArquivo(IFormFile arquivo, string imgPrefixo)
+            {
+                // Verifica se existe arquivo
+                if (arquivo.Length <= 0) return false;
 
+                // Cria um caminho
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/imagens", imgPrefixo + arquivo.FileName);
+        
+                // Verifica se o arquivo é repetido.
+                if(System.IO.File.Exists(path))
+                {
+                    ModelState.AddModelError(key: string.Empty, errorMessage: "Já existe um arquivo com este nome!");
+                    return false;
+                }
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    // Faz a gravação no disco.
+                    await arquivo.CopyToAsync(stream);
+                }
+
+                return true;
+            }
+
+</blockquete
+
+ - Antes de chamar o método cria um prefixo.
+
+ <blockquete>
+
+            public async Task<IActionResult> Create(ProdutoViewModel produtoViewModel)
+            {
+                // Cria um objeto vazio de "ProdutoViewModel" com uma lista de fornecedores.            
+                produtoViewModel = await PopularFornecedores(produtoViewModel);
+
+                // Se a ModelState não for valida recarrega a pagina.
+                if (!ModelState.IsValid) return View(produtoViewModel);
+
+                //upload do arquivo
+                var imgPrefixo = Guid.NewGuid() + "_";
+                if(!await UploadArquivo(produtoViewModel.ImagemUpload, imgPrefixo))
+                {
+                    return View(produtoViewModel);
+                }
+
+                produtoViewModel.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
+
+                // Uso repositorio para adicionar o produto convertido.
+                await _produtoRepository.Adicionar(_mapper.Map<Produto>(produtoViewModel));
+
+                return RedirectToAction(actionName: "Index");
+            }
+
+</blockquete>
+  
+ - Para exibir na lista de produtos.
+
+<blockquete>
+
+        <td>
+            <img src="~/imagens/@item.Imagem" alt="@item.Imagem" style="width: 100px; height: 100px"
+                    class="img-fluid img-rounded"/>
+        </td>
+
+</blockquete>
+
+# Customizando a edição do produto
  
  - 
 
- <blockquete>
- </blockquete>
-
- 
  - 
 
- <blockquete>
- </blockquete>
+<blockquete>
 
- 
- - 
 
- <blockquete>
- </blockquete>
+</blockquete>
 
  
  - 

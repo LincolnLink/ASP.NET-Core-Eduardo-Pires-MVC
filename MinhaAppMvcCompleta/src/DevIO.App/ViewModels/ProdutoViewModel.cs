@@ -27,6 +27,7 @@ namespace DevIO.App.ViewModels
         [DisplayName("Imagem do Produto")]
         public IFormFile ImagemUpload { get; set; }
 
+        [DisplayName("Imagem")]
         public string Imagem { get; set; }
 
         //[Moeda]
