@@ -2958,19 +2958,82 @@ então com isso cria uma logica para verificar se o urusrio está logado ou não
 
 - Cria uma controller para o produto.
 
- <blockquete>
- </blockquete>
-
- 
- <blockquete>
- </blockquete>
-
- 
- <blockquete>
- </blockquete>
-
 # Customização das Views
  
+ - Cria uma parcial view de endereco.
+  
+ - Bota ela dentro da tela de create do fornecedor.
+
+ - Ultiliza classes do bootstrap na tela de index.
+
+ - Instala o font-awnso, na pasta lib, clica com o botão direto.
+
+ - Add -> biblioteca do lado do cliente.
+
+ - Arrasta e solta o arquivo css no arquivo de "_Layout" para gerar um link.
+
+ - aplica as classes para por os icones.
+
+<blockquete>
+
+        <td class="text-right">
+                <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id"><span class="fa fa-search"></span></a>
+                <a class="btn btn-warning" asp-action="Edit" asp-route-id="@item.Id"><span class="fa fa-pencil-alt"></span></a>
+                <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id"><span class="fa fa-trash"></span></a>
+        </td>
+
+</blockquete>
+ 
+ - Na tela de create de produtos, não é usado o "ViewBag.FornecedorId", e sim uma outra forma de carregar,
+ os fornecedores.
+
+<blockquete>
+
+            <div class="form-group">
+                <label asp-for="FornecedorId" class="control-label"></label>
+                <select asp-for="FornecedorId" class="form-control"
+                        asp-items="@(new SelectList(Model.Fornecedores, dataValueField: "Id", dataTextField: "Nome"))">
+                    <option></option>
+                </select>
+                <span asp-validation-for="FornecedorId" class="text-danger"></span>
+            </div>
+
+</blockquete>
+
+ - Na tag form, deve ter mais uma informação , sobre os dados que vai ser salvo.
+  
+<blockquete>
+
+        <form enctype="multipart/form-data" asp-action="Create">
+
+</blockquete>
+
+ - É colocada na parte de script uma validação manual, porq esse campo ele só recebe a imagem.
+ 
+<blockquete>
+
+          <script>
+                // Botando o nome do arquivo na div.
+                $("#ImagemUpload").change(function () {
+                    $("#img_nome").text(this.files[0].name);
+                    $("#img_nome")[0].style.display = 'block';
+                });
+
+                // Atribuindo uma validação manualmente.
+                $("#ImagemUpload").attr("data-val", "true");
+                $("#ImagemUpload").attr("data-val-required", "Preencha o campo Imagem");
+           </script>
+
+</blockquete>
+
+ - ajuste o titulo e botão do formulario.
+
+# Upload de imagem do produto
+
+ - 
+
+ -
+
  - 
 
  
@@ -2978,16 +3041,19 @@ então com isso cria uma logica para verificar se o urusrio está logado ou não
 
  <blockquete>
  </blockquete>
+
  
  - 
 
  <blockquete>
  </blockquete>
+
  
  - 
 
  <blockquete>
  </blockquete>
+
  
  - 
 
