@@ -102,11 +102,34 @@ namespace DevIO.App.Controllers
         {
             //Verifica se o id é o mesmo que tem no objeto
             if (id != produtoViewModel.Id) return NotFound();
-            
+
+            // Buscando os dados originais.
+            var produtoAtualizacao = await ObterProduto(id);
+            produtoViewModel.Fornecedor = produtoAtualizacao.Fornecedor;
+            produtoViewModel.Imagem = produtoAtualizacao.Imagem;
+
+            // Verificando se está valida a ModelState
             if (!ModelState.IsValid) return View(produtoViewModel);
 
+            // Verifica se tem imagem nova.
+            if(produtoViewModel.ImagemUpload != null)
+            {
+                var imgPrefixo = Guid.NewGuid() + "_";
+                if(!await UploadArquivo(produtoViewModel.ImagemUpload, imgPrefixo))
+                {
+                    return View(produtoViewModel);
+                }
+
+                produtoAtualizacao.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
+            }
+
+            produtoAtualizacao.Nome = produtoViewModel.Nome;
+            produtoAtualizacao.Descricao = produtoViewModel.Descricao;
+            produtoAtualizacao.Valor = produtoViewModel.Valor;
+            produtoAtualizacao.Ativo = produtoViewModel.Ativo;
+
             // Faz a atualização do produto.
-            await _produtoRepository.Atualizar(_mapper.Map<Produto>(produtoViewModel));
+            await _produtoRepository.Atualizar(_mapper.Map<Produto>(produtoAtualizacao));
 
             return RedirectToAction(actionName: "Index");
         }

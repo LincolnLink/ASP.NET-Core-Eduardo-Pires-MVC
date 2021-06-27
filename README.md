@@ -1170,7 +1170,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  - Cria valores pre definidos apenas para fazer teste no mesmo método.
 
- <blockquete>
+<blockquete>
 
     private readonly MeuDbContext _contexto;
 
@@ -3101,10 +3101,300 @@ então com isso cria uma logica para verificar se o urusrio está logado ou não
 </blockquete>
 
 # Customizando a edição do produto
- 
- - 
 
- - 
+ - Verifica se o id é o mesmo que tem no objeto.
+ - Buscando os dados originais, salva na var "produtoAtualizacao".
+ - Verificando se está valida a ModelState.
+ - Verifica se tem imagem nova, se tiver salva no diretorio e troca.
+ - Salva no banco o "produtoAtualizacao", uma forma segura de salvar informações.
+ 
+<blockquete>
+
+            if (id != produtoViewModel.Id) return NotFound();
+
+            var produtoAtualizacao = await ObterProduto(id);
+            produtoViewModel.Fornecedor = produtoAtualizacao.Fornecedor;
+            produtoViewModel.Imagem = produtoAtualizacao.Imagem;
+
+            if (!ModelState.IsValid) return View(produtoViewModel);
+
+            if(produtoViewModel.ImagemUpload != null)
+            {
+                var imgPrefixo = Guid.NewGuid() + "_";
+                if(!await UploadArquivo(produtoViewModel.ImagemUpload, imgPrefixo))
+                {
+                    return View(produtoViewModel);
+                }
+
+                produtoAtualizacao.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
+            }
+
+            produtoAtualizacao.Nome = produtoViewModel.Nome;
+            produtoAtualizacao.Descricao = produtoViewModel.Descricao;
+            produtoAtualizacao.Valor = produtoViewModel.Valor;
+            produtoAtualizacao.Ativo = produtoViewModel.Ativo;
+
+            // Faz a atualização do produto.
+            await _produtoRepository.Atualizar(_mapper.Map<Produto>(produtoAtualizacao));
+
+            return RedirectToAction(actionName: "Index");
+
+</blockquete>
+
+ - No construtor do contexto bota uma configuração para evitar um bug aonde
+ o Entity framework tenta usar o mesmo id de um objeto já salvo e não consegue atualizar os dados.
+
+<blockquete>
+
+            public MeuDbContext(DbContextOptions options) : base(options)
+            {
+                ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+                ChangeTracker.AutoDetectChangesEnabled = false;
+            }
+
+</blockquete>
+
+# Globalizando a aplicação em pt-BR
+
+ - Cria uma confgiração na StratUp sobre globalização.
+  
+<blockquete>
+
+            var defaultCulture = new CultureInfo(name: "pt-BR");
+            var localizationOptions = new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture(defaultCulture),
+                SupportedCultures = new List<CultureInfo> { defaultCulture },
+                SupportedUICultures = new List<CultureInfo> { defaultCulture },
+            };
+            app.UseRequestLocalization(localizationOptions);
+
+</blockquete>
+
+ - Cria um codigo JS para forçar o jQuery aceitar a globalização.
+
+<blockquete>
+        
+            <script>
+                $.validator.methods.range = function (value, element, param) {
+                    var globalizedValue = value.replace(",", ".");
+                    return this.optional(element) || (globalizedValue >= param[0] && globalizedValue <= param[1]);
+                };
+
+                $.validator.methods.number = function (value, element) {
+                    return this.optional(element) || /-?(?:\d+|\d{1,3}(?:[\s\.,]\d{3})+)(?:[\.,]\d+)?$/.test(value);
+                };
+
+                $.validator.methods.date = function (value, element) {
+                    var date = value.split("/");
+                    return this.optional(element) || !/Invalid|NaN/.test(new Date(date[2], date[1], date[0]).toString());
+                };
+            </script>
+
+</blockquete>
+
+- Deixando as mensagem de erro padrão do ASP.net em pt-br.
+
+- Cria uma pasta chamada "Configurations" e um arquivo chamado "MvcConfig.cs".
+
+- Com ela uma configuração aonde traduz as mensagens padrão de erro do dotnet.
+
+<blockquete>
+
+    public static class MvcConfig
+    {
+        public static IServiceCollection AddMvcConfiguration(this IServiceCollection services)
+        {
+            services.AddControllersWithViews(o =>
+            {
+                o.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor((x, y) => "O valor preenchido é inválido para este campo.");
+                o.ModelBindingMessageProvider.SetMissingBindRequiredValueAccessor(x => "Este campo precisa ser preenchido.");
+                o.ModelBindingMessageProvider.SetMissingKeyOrValueAccessor(() => "Este campo precisa ser preenchido.");
+                o.ModelBindingMessageProvider.SetMissingRequestBodyRequiredValueAccessor(() => "É necessário que o body na requisição não esteja vazio.");
+                o.ModelBindingMessageProvider.SetNonPropertyAttemptedValueIsInvalidAccessor(x => "O valor preenchido é inválido para este campo.");
+                o.ModelBindingMessageProvider.SetNonPropertyUnknownValueIsInvalidAccessor(() => "O valor preenchido é inválido para este campo.");
+                o.ModelBindingMessageProvider.SetNonPropertyValueMustBeANumberAccessor(() => "O campo deve ser numérico");
+                o.ModelBindingMessageProvider.SetUnknownValueIsInvalidAccessor(x => "O valor preenchido é inválido para este campo.");
+                o.ModelBindingMessageProvider.SetValueIsInvalidAccessor(x => "O valor preenchido é inválido para este campo.");
+                o.ModelBindingMessageProvider.SetValueMustBeANumberAccessor(x => "O campo deve ser numérico.");
+                o.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(x => "Este campo precisa ser preenchido.");
+
+                //o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+            });
+
+            services.AddRazorPages();
+
+            return services;
+        }
+    }
+
+</blockquete>
+
+
+### Criando um atributo personalizado de Moeda.
+
+- Cria 3 classes para configurar um atributo personalizado.
+
+- Para ultilizar o atributo use apenas o nome "Moeda" na propriedade da viewModel.
+
+<blockquete>
+
+        [Moeda]
+        [Required(ErrorMessage = "O campo {0} é obrigatório")]
+        public decimal Valor { get; set; }
+
+</blockquete>
+
+- A primeira classe configura o atributo na parte backEnd.
+- Cria uma classe chamada "MoedaAttribute", na pasta "Extensions".
+- "Moeda" é o nome do atributo e "Attribute" é uma forma que o dotnet declara o atributo.
+- A classe "ValidationAttribute" que é herdada define a classe "MoedaAttribute" como um atributo.
+
+<blockquete>
+
+    public class MoedaAttribute : ValidationAttribute
+    {
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        {
+            try
+            {
+                var moeda = Convert.ToDecimal(value, new CultureInfo("pt-BR"));
+            }
+            catch (Exception)
+            {
+                return new ValidationResult("Moeda em formato inválido");
+            }
+
+            return ValidationResult.Success;
+        }
+    }
+
+</blockquete>
+
+- A segunda classe ele vincula regras de validação para o frontEnd.
+- Cria um classe chamada "MoedaAttributeAdapter", no mesmo arquivo que tem a classe do atributo. 
+- Devemos herdas a classe "AttributeAdapterBase" e passar o atributo que vai ser configurado para o backend.
+- O método construtor é obrigatorio.
+- Cria a validação e o tratamento de erro.
+
+<blockquete>
+
+    public class MoedaAttributeAdapter : AttributeAdapterBase<MoedaAttribute>
+    {
+        public MoedaAttributeAdapter(MoedaAttribute attribute, IStringLocalizer stringLocalizer) : base(attribute, stringLocalizer)
+        {
+
+        }
+        public override void AddValidation(ClientModelValidationContext context)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            MergeAttribute(context.Attributes, "data-val", "true");
+            MergeAttribute(context.Attributes, "data-val-moeda", GetErrorMessage(context));
+            MergeAttribute(context.Attributes, "data-val-number", GetErrorMessage(context));
+        }
+        public override string GetErrorMessage(ModelValidationContextBase validationContext)
+        {
+            return "Moeda em formato inválido";
+        }
+    }
+
+</blockquete>
+
+- A terceira classe, é um provedor para o atributo, serve para a validação no frontEnd do atributo.
+- Esse provedor é uma classe chamada "MoedaValidationAttributeAdapterProvider",
+que herda a interface "IValidationAttributeAdapterProvider".
+- Essa configuração é padrão, então basta copiar e colar com nome diferente para outros atributos.
+
+<blockquete>
+
+    public class MoedaValidationAttributeAdapterProvider : IValidationAttributeAdapterProvider
+    {
+        private readonly IValidationAttributeAdapterProvider _baseProvider = new ValidationAttributeAdapterProvider();
+        public IAttributeAdapter GetAttributeAdapter(ValidationAttribute attribute, IStringLocalizer stringLocalizer)
+        {
+            if (attribute is MoedaAttribute moedaAttribute)
+            {
+                return new MoedaAttributeAdapter(moedaAttribute, stringLocalizer);
+            }
+
+            return _baseProvider.GetAttributeAdapter(attribute, stringLocalizer);
+        }
+    }
+
+</blockquete>
+
+- Para finalizar devemos configurar uma injeção de dependencia na class StratUp.
+
+<blockquete>
+
+    services.AddSingleton<IValidationAttributeAdapterProvider, MoedaValidationAttributeAdapterProvider>();
+
+</blockquete>
+
+### Editando o visual da exibição de valores moeda.
+
+- Apenas bote um "pipe" do dotnet, troca o tipo de formatação.
+
+- Antigo formato.
+
+<blockquete>
+
+        @Html.DisplayFor(modelItem => item.Valor)
+
+</blockquete>
+
+- Novo formato
+
+<blockquete>
+
+        @item.Valor.ToString(format:"C")
+
+</blockquete>
+
+- Reconhece qualquer pais, deacordo com a cultura passada.
+
+-
+
+
+
+-
+-
+-
+
+
+<blockquete>
+
+
+</blockquete>
+
+-
+-
+-
+
+
+<blockquete>
+
+
+</blockquete>
+
+-
+-
+-
+
+
+<blockquete>
+
+
+</blockquete>
+
+-
+-
+-
+- 
 
 <blockquete>
 

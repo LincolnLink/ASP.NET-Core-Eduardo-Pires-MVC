@@ -1,3 +1,4 @@
+using DevIO.App.Configurations;
 using DevIO.App.Data;
 using DevIO.Business.Interfaces;
 using DevIO.Data.Context;
@@ -7,12 +8,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -42,17 +45,17 @@ namespace DevIO.App
                 .AddDefaultUI()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddControllersWithViews();
-            services.AddRazorPages();
+            //services.AddControllersWithViews();
+            //services.AddRazorPages();
+
+            // Configuração da cultura
+            services.AddMvcConfiguration();
 
             // Configurando o automapper, informa o assemble.
             services.AddAutoMapper(typeof(Startup));
 
             //Injeção de dependencia
-            services.AddScoped<MeuDbContext>();
-            services.AddScoped<IProdutoRepository, ProdutoRepository>();
-            services.AddScoped<IFornecedorRepository, FornecedorRepository>();
-            services.AddScoped<IEnderecoRepository, EnderecoRepository>();
+            services.ResolveDependencies();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,6 +79,15 @@ namespace DevIO.App
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            var defaultCulture = new CultureInfo(name: "pt-BR");
+            var localizationOptions = new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture(defaultCulture),
+                SupportedCultures = new List<CultureInfo> { defaultCulture },
+                SupportedUICultures = new List<CultureInfo> { defaultCulture },
+            };
+            app.UseRequestLocalization(localizationOptions);
 
             app.UseEndpoints(endpoints =>
             {
