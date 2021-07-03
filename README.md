@@ -6,8 +6,6 @@ Aulas de MVC com Eduardo Pires, asp.net CORE
 
 - Ele é um padrão arquitetural
 
-- Se para responsabilidade
-
 # Rotas
 
 - Rotas são basicamente estruturas de navegação personalizadas para que a URL da aplicação possua determinado padrão e atenda as necessidades de passagem de parâmetros.
@@ -3357,34 +3355,170 @@ que herda a interface "IValidationAttributeAdapterProvider".
 
 - Reconhece qualquer pais, deacordo com a cultura passada.
 
--
+# Finalizando o ajuste das Views
 
+- Botando campo de area na descrição, na tela de create do produto.
+- Botando o bootstrap na tela de detalhe do produto.
+- Arruma o css das telas do CRUD.
+- Cria um arquivo chamado "RazorExtensions" na pasta "Extensions".
+- Máscara para editar a visualização de documento da pagina de fornecedores.
 
-
--
--
--
-
-
-<blockquete>
-
-
-</blockquete>
-
--
--
--
-
+### Máscara dinamica.
 
 <blockquete>
 
+            public static class RazorExtensions
+            {
+                public static string FormataDocumento(this RazorPage page, int tipoPessoa, string documento)
+                {
+                    return tipoPessoa == 1
+                        ? Convert.ToUInt64(documento).ToString(format: @"000\.000\.000\-00")
+                        : Convert.ToUInt64(documento).ToString(format: @"00\.000\.000\/0000\-00");
+                }
+            }
 
 </blockquete>
 
--
--
--
+- Com esse método é possivel por uma mascara dinamica no documento.
 
+<blockquete>
+
+        <td>
+            @this.FormataDocumento(item.TipoFornecedor, item.Documento)
+        </td> 
+
+</blockquete>
+
+- Editando os detalhes de Fornecedor.
+- Cria uma view que será uma parcialView.
+- Escolha um nome com "_" no inicio.
+- Depois um modelo que sera o modelo "List".
+- Escolha um viewModel que será o "FornecedorViewModel".
+- Dentro do "FornecedorViewModel" tem o objeto endereço, use ele paraexibir as informações.
+- Depois um contexto, mas depois remova a referencia do contexto.
+- o dotnet criara um view, você apenas edita o que realmente gostaria de exibir.
+
+<blockquete>
+
+        @model DevIO.App.ViewModels.FornecedorViewModel
+           
+        <div class="pt-3">
+            <div>
+                <hr />
+                <h4>Endereço</h4>
+            </div>
+
+            @if (Model != null)
+            {
+                <table class="table table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Endereco.Logradouro)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Endereco.Numero)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Endereco.Complemento)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Endereco.Bairro)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Endereco.Cep)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Endereco.Cidade)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Endereco.Estado)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(model => model.Endereco.Logradouro)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.Endereco.Numero)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.Endereco.Complemento)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.Endereco.Bairro)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.Endereco.Cep)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.Endereco.Cidade)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(model => model.Endereco.Estado)
+                        </td>
+                        <td>
+                            <a supress-by-action="Edit,ObterEndereco" asp-action="AtualizarEndereco" asp-route-id="@Model.Id" class="btn btn-info" data-modal="">
+                                <span title="Editar" class="fa fa-pencil-alt"></span>
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+                }
+        </div>
+
+</blockquete>
+
+- Usando a ParcialView de enderoço na tela de edição do fornecedor.
+
+<blockquete>
+
+        <div id="EnderecoTarget">
+            <partial name="_DetalhesEndereco" />
+        </div>
+
+</blockquete>
+
+### Lista de produtos
+- Criando uma lista de produtos que vai ser reaproveitada.
+- Copia a index de produto, e renomeia para "_ListaProdutos"
+- No arquivo "_ListaProdutos" bota apenas a tabela.
+- Nos botões bota as o controller, para ele saber que vem de produto.
+
+<blockquete>
+
+         <a class="btn btn-info" asp-controller="Produtos" 
+         asp-action="Details" 
+         asp-route-id="@item.Id">
+         <span class="fa fa-search"></span></a>
+                    
+</blockquete>
+
+- No na view "Index" dor produtos, bota uma parcialView.
+
+<blockquete>
+
+        <partial name="_ListaProdutos" />
+
+</blockquete>
+
+- No editar também bota a parcialView da lista de produtos, só que com outro caminho.
+- Devemos alimentar essa parcialView, passando o model.
+
+<blockquete>
+
+        <partial name="../Produtos/_ListaProdutos" model="@Model.Produtos" />
+
+</blockquete>
+
+- Tratando a tela de detalhes do fornecedor.
+- Bota um css pros botões, bota o tratamento do documento.
+- Inclui a parcial view de endereço.
+- Tratando a tela de deletar do fornecedor.
+
+# 
 
 <blockquete>
 
