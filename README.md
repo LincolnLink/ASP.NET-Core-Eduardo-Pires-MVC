@@ -3518,25 +3518,230 @@ que herda a interface "IValidationAttributeAdapterProvider".
 - Inclui a parcial view de endereço.
 - Tratando a tela de deletar do fornecedor.
 
-# 
+# Utilizando Modal Window de edição.
+
+### Resumo
+
+- Ideia: Quando o usuario entra na view de edit/delete/details do fornecedor, vai ter a opção de ver o endereço.
+- Ele consegue ver porque a view tem uma partialView chamada "_DetalhesEndereco".
+
+- No _DetalhesEndereco) tem um botão para editar, aonde é chamada uma modal via jQuery.
+- Esse botão recebe o id atraves do "asp-route-id", e a action atraves do "asp-action".
+
+- O Action que foi chamado se chama "AtualizarEndereco", que está dentro do controller "FornecedoresController".
+- Esse action/método é executado, ele retorna um PartialViewResult, pelo método "PartialView".
+
+- O "PartialView" recebe como parametro uma string que é o nome de uma partialView que vai ser a modal!
+- E também recebe um objeto, obtido pelo metodo, que vai alimentar essa modal/partialView.
+
+- Cria uma partialView chamada "_AtualizarEndereco", o form da partialView faz referencia a action,
+usando asp-action="AtualizarEndereco", se usa uma outra partialView chamada "_Endereco" para invicar os forms.
+
+- No arquivo js, o jQuery usa o método .load(), para passar todo o resultado do método "AtualizarEndereco", para
+a div que tem o id "#myModalContent", essa div fica na view Edit, alem disso ela deixa o conteudo da div que tem o id
+"#myModal" visivel. 
+
+- Quando a modal sofre uma atualização, o método bindForm(), recebe uma url, fazendo com que a exibição do endereco
+seja atualizado.
+- partialView "_AtualizarEndereco" é mandada para "#EnderecoTarget" um id que fica na div da _DetalhesEndereco.
+
+### Ideia em pratica
+
+- Cria uma nova parcialView, chamada "_AtualizarEndereco"
+- Boata as classes do bootstrap.
+- O comando "data-dismiss="modal"" que faz a ação de fechar a modal.
+- Bota uma partialView de endereço, que é o formulario.
 
 <blockquete>
 
+                @model DevIO.App.ViewModels.FornecedorViewModel
+                @{ 
+                    ViewData["Title"] = "Atualizar Endereço";
+                }
+
+                <div class="modal-header">
+                    <h4 class="modal-title">@ViewData["Title"]</h4>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hideen="true">x</span><span class="sr-only">Fechar</span>
+                    </button>
+                </div>
+
+                <form asp-action="AtualizarEndereco">
+                    <div class="modal-body">
+
+                            <input type="hidden" asp-for="Endereco.FornecedorId" />
+                            <input type="hidden" asp-for="Endereco.Id" />
+
+                            <partial name="_Endereco" />
+
+                            <div class="modal-footer">
+                                <div class="col-md-offset-2 col-md-10">
+                                    <input type="submit" value="Atualizar Endereço" class="btn btn-success" />
+                                    <input type="button" class="btn btn-info" value="Fechar" data-dismiss="modal" />
+                                </div>
+                            </div>
+                    </div>
+                </form>
 
 </blockquete>
 
--
--
--
-- 
+- Cria o método/action, que vai popular os campos, para ser atualizados.
+- Obtenha os dados para ser atualizados.
+- Chama a PartialView, e alimenta apenas a parte do Endereco.
 
 <blockquete>
 
+            [Route("atualizar-endereco-fornecedor/{id:guid}")]
+            public async Task<IActionResult> AtualizarEndereco(Guid id)
+            {                
+                var fornecedor = await ObterFornecedorEndereco(id);
+
+                if (fornecedor == null)
+                {
+                    return NotFound();
+                }                
+                return PartialView("_AtualizarEndereco", new FornecedorViewModel { Endereco = fornecedor.Endereco });
+            }
 
 </blockquete>
 
+ - Implementa um script na tela de "edit do fornecedor".
+ - Esse script faz com que a modal abra.
  
- - 
+<blockquete>
+  
+            @section Scripts {
+            @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+            <script>
+                $(document).ready(function () {
+                    AjaxModal();
+                });
+            </script>
+
+</blockquete>
+
+### Métodos do jQuery, para a modal funcionar.
+
+ - Na pasta site.js do wwwtoot, recebe o medoto "SetModal()".
+ - .on(): Quando o link que tiver o atributo "data-modal" for clickado, recebe a url e o id.
+ - .load(): Pega os dados e bota aonde tem o id "#myModalContent".
+ - .modal(): Comando que exibe a modal().
+ - bindForm(): Método que pega os dados e alimenta a partialView "AtualizarEndereco"
+ - Carrega o resultado aonde tem o id "#EnderecoTarget".
+ - Quando o metodo do controller retorna uma PartialView, ele atualiza apenas a PartialView.
+ - Isso é necessario para que ele atualiza apenas uma parte da view, atualiza apenas a partialView.
+
+<blockquete>
+
+        function SetModal() {
+
+        $(document).ready(function () {
+            $(function () {
+                $.ajaxSetup({ cache: false }); //Configura chache
+
+                $("a[data-modal]").on("click",
+                    function (e) {
+                        $('#myModalContent').load(this.href,
+                            function () {
+                                $('#myModal').modal({
+                                    keyboard: true
+                                },
+                                    'show');
+                                bindForm(this);
+                            });
+                        return false;
+                    });
+            });
+        });
+        }
+
+        function bindForm(dialog) {
+        $('form', dialog).submit(function () {
+            $.ajax({
+                url: this.action,
+                type: this.method,
+                data: $(this).serialize(),
+                success: function (result) {
+                    if (result.success) {
+                        $('#myModal').modal('hide'); // Esconde a modal.
+                        $('#EnderecoTarget').load(result.url); // Carrega o resultado HTML para a div demarcada.
+                    } else {
+                        $('#myModalContent').html(result);
+                        bindForm(dialog);
+                    }
+                }
+            });
+
+            SetModal();
+            return false;
+        });
+}
+
+</blockquete>
+
+### Método para atualizar os dados do endereço na modal.
+
+- Cria um método actionResult post para atualizar no proprio controller do fornecedor para o endereço.
+- De o nome de "AtualizarEndereco".
+- Remove alguns itens da "ModelState", porq a modal só avalia apenas o objeto endereço.
+- Verifica de a "ModelState" está ok.
+- Pega os dados usando o repositorio.
+- converte em uma url para o Json e retorna dentro de um objeto.
+- Para criar essa url, é preciso criar outro método chamado "ObterEndereco".
+- Esse método retorna uma partialView chamada "_DetalhesEndereco".
+
+<blockquete>
+
+        [Route("obter-endereco-fornecedor/{id:guid}")]
+        public async Task<IActionResult> ObterEndereco(Guid id)
+        {
+            var fornecedor = await ObterFornecedorEndereco(id);
+
+            if (fornecedor == null)
+            {
+                return NotFound();
+            }
+
+            return PartialView("_DetalhesEndereco", fornecedor);
+        }
+
+        [Route("atualizar-endereco-fornecedor/{id:guid}")]
+        public async Task<IActionResult> AtualizarEndereco(Guid id)
+        {
+            // Obtenha os dados para ser atualizados.
+            var fornecedor = await ObterFornecedorEndereco(id);
+
+            if (fornecedor == null)
+            {
+                return NotFound();
+            }
+            // chama a PartialView, e alimenta apenas a parte do Endereco.
+            return PartialView("_AtualizarEndereco", new FornecedorViewModel { Endereco = fornecedor.Endereco });
+        }
+
+        [Route("atualizar-endereco-fornecedor/{id:guid}")]
+        [HttpPost]
+        public async Task<IActionResult> AtualizarEndereco(FornecedorViewModel fornecedorViewModel)
+        {
+            ModelState.Remove("Nome");
+            ModelState.Remove("Documento");
+
+            if (!ModelState.IsValid) return PartialView("_AtualizarEndereco", fornecedorViewModel);
+
+            await _enderecoRepository.Atualizar(_mapper.Map<Endereco>(fornecedorViewModel.Endereco));
+                        
+            var url = Url.Action("ObterEndereco", "Fornecedores", new { id = fornecedorViewModel.Endereco.FornecedorId });
+            return Json(new { success = true, url });
+        }
+
+</blockquete>
+
+#
+
+- 
+-
+-
 
  <blockquete>
  </blockquete>
