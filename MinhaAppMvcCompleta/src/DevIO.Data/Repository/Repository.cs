@@ -25,8 +25,10 @@ namespace DevIO.Data.Repository
       
         public async Task<IEnumerable<T>> Buscar(Expression<Func<T, bool>> predicate)
         {
-            // Percebe as mudanças de stado, retorna as mudanças com mais performace.
+            // Percebe as mudanças de estado, retorna as mudanças com mais performace.
             // Deve sempre usar o await, para receber o valor do banco.
+            // AsNoTracking: pesquisar melhor, sei que serve para não da bug.
+            // predicate: é uma "expressão" que é uma função que retorna um valor bool.
             return await DbSet.AsNoTracking().Where(predicate).ToListAsync();
         }     
 

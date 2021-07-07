@@ -14,21 +14,26 @@ namespace DevIO.App.Controllers
     public class ProdutosController : BaseController
     {
         private readonly IProdutoRepository _produtoRepository;
-        private readonly IFornecedorRepository _fornecedorRepository;
+        private readonly IProdutoService _produtoService;
+        private readonly IFornecedorRepository _fornecedorRepository;        
         private readonly IMapper _mapper;
 
         //Injeção de dependencia dos repositorios e do Automapper
         public ProdutosController(
             IProdutoRepository produtoRepository,
+            IProdutoService produtoService,
             IFornecedorRepository fornecedorRepository,
-            IMapper mapper)
+            IMapper mapper,
+            INotificador notificador) : base(notificador)
         {
             _produtoRepository = produtoRepository;
+            _produtoService = produtoService;
             _fornecedorRepository = fornecedorRepository;
             _mapper = mapper;
         }
 
         // GET: Produtos
+        [Route("lista-de-produtos")]
         public async Task<IActionResult> Index()
         {    
             // Pega todos os produtos e seus fornecedores, converte para um IEnumerable "ProdutoViewModel"
@@ -36,6 +41,7 @@ namespace DevIO.App.Controllers
         }
 
         // GET: Produtos/Details/5
+        [Route("dados-do-produto/{id:guid}")]
         public async Task<IActionResult> Details(Guid id)
         {
             // Pega o produto que tem o id especifico, exiba a tela apenas se ele existir.
@@ -48,6 +54,7 @@ namespace DevIO.App.Controllers
         }
 
         // GET: Produtos/Create
+        [Route("novo-produto")]
         public async Task<IActionResult> Create()
         {
             // Cria um objeto vazio de "ProdutoViewModel" com uma lista de fornecedores.
@@ -55,9 +62,10 @@ namespace DevIO.App.Controllers
             return View(ProdutoViewModel);
         }
 
-        // POST: Produtos/Create       
+        // POST: Produtos/Create
+        [Route("novo-produto")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProdutoViewModel produtoViewModel)
         {
             // Cria um objeto vazio de "ProdutoViewModel" com uma lista de fornecedores.            
@@ -76,12 +84,15 @@ namespace DevIO.App.Controllers
             produtoViewModel.Imagem = imgPrefixo + produtoViewModel.ImagemUpload.FileName;
 
             // Uso repositorio para adicionar o produto convertido.
-            await _produtoRepository.Adicionar(_mapper.Map<Produto>(produtoViewModel));
+            await _produtoService.Adicionar(_mapper.Map<Produto>(produtoViewModel));
+
+            if (!OperacaoValida()) return View(produtoViewModel);
 
             return RedirectToAction(actionName: "Index");
         }
 
         // GET: Produtos/Edit/5
+        [Route("editar-produto/{id:guid}")]
         public async Task<IActionResult> Edit(Guid id)
         {            
             //Obtem o produto que vai ser editado
@@ -95,9 +106,10 @@ namespace DevIO.App.Controllers
             return View(produtoViewModel);
         }
 
-        // POST: Produtos/Edit/5        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        // POST: Produtos/Edit/5
+        //[ValidateAntiForgeryToken]
+        [Route("editar-produto/{id:guid}")]
+        [HttpPost]        
         public async Task<IActionResult> Edit(Guid id, ProdutoViewModel produtoViewModel)
         {
             //Verifica se o id é o mesmo que tem no objeto
@@ -129,12 +141,15 @@ namespace DevIO.App.Controllers
             produtoAtualizacao.Ativo = produtoViewModel.Ativo;
 
             // Faz a atualização do produto.
-            await _produtoRepository.Atualizar(_mapper.Map<Produto>(produtoAtualizacao));
+            await _produtoService.Atualizar(_mapper.Map<Produto>(produtoAtualizacao));
+
+            if (!OperacaoValida()) return View(produtoViewModel);
 
             return RedirectToAction(actionName: "Index");
         }
 
         // GET: Produtos/Delete/5
+        [Route("excluir-produto/{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             // Obtem o produto que vai ser deletado
@@ -149,8 +164,9 @@ namespace DevIO.App.Controllers
         }
 
         // POST: Produtos/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
+        [Route("excluir-produto/{id:guid}")]
+        [HttpPost, ActionName("Delete")]       
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             // Obtem o produto que vai ser deletado
@@ -161,7 +177,11 @@ namespace DevIO.App.Controllers
                 return NotFound();
             }
             // Deleta o produto usando o repositorio.
-            await _produtoRepository.Remover(id);
+            await _produtoService.Remover(id);
+
+            if (!OperacaoValida()) return View(produto);
+                        
+            TempData["Sucesso"] = "Produto excluido com sucesso!";
 
             return RedirectToAction(actionName: "Index");
         }

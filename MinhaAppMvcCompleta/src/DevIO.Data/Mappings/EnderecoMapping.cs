@@ -27,8 +27,7 @@ namespace DevIO.Data.Mappings
                 .HasColumnType("varchar(8)");
 
             // Define o campo como requirido, define o tipo da coluna            
-            builder.Property(c => c.Complemento)
-                .IsRequired()
+            builder.Property(c => c.Complemento)               
                 .HasColumnType("varchar(250)");
 
             // Define o campo como requirido, define o tipo da coluna            

@@ -3813,69 +3813,500 @@ seja atualizado.
 
 
 # Organizando e otimizando a estrutura da App
-- 
--
--
+
+### Configurações que já foramexplicadas.
+
+- Isolou o codigo da startUp que envolve: Injeção de dependencia, Identity, Validações, Globalização.
+- Criou no contrutor da startUp e criou outros arquivos "appsettings.json", para criar outros ambientes,
+finalizando a configuração no arquivo "launchSettings.json"
+- Configurou um "EmailTagHelper".
+
+# Roteamento inteligente
+
+- Cria nome para as rotas, de cada action das controller.
+- Exemplo: 
+
 <blockquete>
+
+        [Route("lista-de-fornecedores")]
  
 </blockquete>
--
--
--
+
+# Validando as entidades de negócio
+
+- Vamos validar os dados do lado da camada de negocios.
+- É diferente da validação da camada de cliente, que serve apenas para filtrar.
+- Não e seguro depender do JS, porq ele pode ser desligado.
+- No vanegador na area de inspeção usa o comando crtl+shift+p, e com isso desabilitar o JS.
+- Por isso essa validação pelo cliente não é tão segura.
+
+### Criando classes de serviços.
+
+- Cria uma classe chamada "BaseService","FornecedorService","ProdutoService" 
+na pasta "service" da camada de negocio.
+
+- Cria duas interfaces chamada "IFornecedorService" e "IProdutoService".
+
+### Conhecendo o FluentValidation
+
+- Serve para validar as entidade, na camada da regra de negocio.
+- https://docs.fluentvalidation.net/en/latest/aspnet.html
+- É criado classes que tem validações de cada entidade.
+
 <blockquete>
- 
-</blockquete>-
--
--
-<blockquete>
- 
-</blockquete>-
--
--
-<blockquete>
- 
-</blockquete>-
--
--
-<blockquete>
- 
-</blockquete>-
--
--
-<blockquete>
- 
-</blockquete>-
--
--
-<blockquete>
- 
-</blockquete>-
--
--
-<blockquete>
- 
-</blockquete>-
--
--
-<blockquete>
- 
-</blockquete>-
--
--
-<blockquete>
- 
-</blockquete>-
--
--
-<blockquete>
+
+    Install-Package FluentValidation
  
 </blockquete>
+
+- Bota a pasta "Validations" na pasta "Models".
+- Na pasta Validtions da camada de negocios, cria uma arquivo chamado: FornecedorValidations.
+- Essa classe herda a classe "AbstractValidator<Fornecedor>", é passado o objeto que vai ser validado para ela.
+- Pode usar o "When" para definir uma situação, quando é uma pessoa fisica ou pessoa juridica, aciona uma ação.
+
+<blockquete>
+
+        public FornecedorValidation()
+        {
+            RuleFor(f => f.Nome)
+                .NotEmpty().WithMessage("O campo {PropertyName} precisa ser fornecido")
+                .Length(min: 2, max: 100)
+                .WithMessage("O campo {PropertyName} precisa ter entre {MinLength} e {MaxLength} caracteres");
+
+            When(f => f.TipoFornecedor == TipoFornecedor.PessoaFisica, () =>
+            {
+                RuleFor(f => f.Documento.Length).Equal(CpfValidacao.TamanhoCpf)
+                    .WithMessage("O campo Documento precisa ter {ComparisonValue} caracteres e foi fornecido {PropertyValue}.");
+                RuleFor(f => CpfValidacao.Validar(f.Documento)).Equal(true)
+                    .WithMessage("O documento fornecido é inválido.");
+            });
+
+            When(f => f.TipoFornecedor == TipoFornecedor.PessoaJuridica, () =>
+            {
+                RuleFor(f => f.Documento.Length).Equal(CnpjValidacao.TamanhoCnpj)
+                    .WithMessage("O campo Documento precisa ter {ComparisonValue} caracteres e foi fornecido {PropertyValue}.");
+                RuleFor(f => CnpjValidacao.Validar(f.Documento)).Equal(true)
+                    .WithMessage("O documento fornecido é inválido.");
+            });
+        }
+
+</blockquete>
+
+### ver depois com calma
+- A classe "CpfValidacao" é criada separada na pasta "Documentos", dentro da pasta "Validations" 
+é um arquivo com muitas classes e varias logicas.
+
+- Esse arquivo auxilia na hora de validar a logica nas classes que valida as entidades, que fica na pasta validations.
+
+- Explicação do operador "Equal"!
+- http://www.macoratti.net/18/07/c_equalsop1.htm
+- https://www.youtube.com/watch?v=I5EUwaHI75U&ab_channel=GabrielArtigas%28CursoseTutoriais%29
+
+
+### Configurando Notificação no contrutor da classe "BaseService"
+- A classe BaseService, recebe métodos que gerencia as mensagens de errro!
+- E métodos que valida apenas passando classes de validação e a entidade!
+- continua no proximo video!
+
+# Regras de negócio e eventos de notificações.
+- Na classe "FornecedorService" cria uma injeção de dependencia de "IFornecedorRepository" e "IEnderecoRepository".
+- No método adicionar, cria um if para verificar se existe o fornecedor cadastrado com o documento informado, 
+usando o método "Buscar" do repositorio do fornecedor. 
+- No método de atualizar veifica se existe o documento cadastrado e se o usuario é diferente do que já existe,
+porque tem que ser um fornecedor cadastrado.
+- No método excluir, verifica se o fornecedor tem produtos, caso tenha ele não vai ser excluido.
+
+<blockquete>
+
+        public class FornecedorService : BaseService, IFornecedorService
+        {
+            private readonly IFornecedorRepository _fornecedorRepository;
+            private readonly IEnderecoRepository _enderecoRepository;
+
+            public FornecedorService(IFornecedorRepository fornecedorRepository,
+                                     IEnderecoRepository enderecoRepository)
+            {
+                _fornecedorRepository = fornecedorRepository;
+                _enderecoRepository = enderecoRepository;
+            }
+
+
+            public async Task Adicionar(Fornecedor fornecedor)
+            {
+                // validar o estado da entidade.            
+                if (!ExecutarValidacao(new FornecedorValidation(), fornecedor)
+                    && !ExecutarValidacao(new EnderecoValidation(), fornecedor.Endereco)) return;
+
+                // verificar se existe fornecedor com o mesmo documento.
+                if(_fornecedorRepository.Buscar(predicate: f=>f.Documento == fornecedor.Documento).Result.Any())
+                {
+                    Notificar(mensagem: "Já existe um fornecedor com este documento informado.");
+                    return;
+                }
+
+                await _fornecedorRepository.Adicionar(fornecedor);
+            }
+
+            public async Task Atualizar(Fornecedor fornecedor)
+            {
+                if (!ExecutarValidacao(new FornecedorValidation(), fornecedor)) return;
+
+                // Verifica se a atualização tem o documento cadastrado, e se é de um fornecedor diferente do que foi achado.
+                if(_fornecedorRepository.Buscar(predicate:f => f.Documento == fornecedor.Documento && 
+                f.Id != fornecedor.Id).Result.Any())
+                {
+                    Notificar(mensagem: "Já existe um fornecedor com este documento informado.");
+                    return;
+                }
+                await _fornecedorRepository.Atualizar(fornecedor);
+            }
+
+            public async Task AtualizarEndereco(Endereco endereco)
+            {
+                if (!ExecutarValidacao(new EnderecoValidation(), endereco)) return;
+
+                await _enderecoRepository.Atualizar(endereco);
+            }
+         
+
+            public async Task Remover(Guid id)
+            {
+                // Caso o fornecedor tenha produtos, não será excluido.
+                if(_fornecedorRepository.ObterFornecedorProdutosEndereco(id).Result.Produtos.Any())
+                {
+                    Notificar(mensagem: "O fornecedor possui produtos cadastrados!");
+                    return;
+                }
+
+                await _fornecedorRepository.Remover(id);
+            }
+
+            public void Dispose()
+            {
+                _fornecedorRepository?.Dispose();
+                _enderecoRepository?.Dispose();
+            }
+        }
+ 
+</blockquete>
+
+- Termina de implementa "ProdutoService".
+- Herda a interface "IDisposable" na interface IFornecedorService e IProdutoService.
+- Implementa o IDisposable nas classes de serviço, chamando o dispose do repositorio.
+
+<blockquete>
+
+        public class ProdutoService : BaseService, IProdutoService
+        {
+            private readonly IProdutoRepository _produtoRepository;
+
+            public ProdutoService(IProdutoRepository produtoRepository)
+            {
+                _produtoRepository = produtoRepository;
+            }
+
+            public async Task Adicionar(Produto produto)
+            {
+                if (!ExecutarValidacao(new ProdutoValidation(), produto)) return;
+
+                await _produtoRepository.Adicionar(produto);
+            }
+
+            public async Task Atualizar(Produto produto)
+            {
+                if (!ExecutarValidacao(new ProdutoValidation(), produto)) return;
+
+                await _produtoRepository.Atualizar(produto);
+            }
+               
+            public async Task Remover(Guid id)
+            {
+                await _produtoRepository.Remover(id);
+            }
+
+            public void Dispose()
+            {
+                _produtoRepository?.Dispose();
+            }
+        }
+ 
+</blockquete>
+
+### Gerenciando as notificações(da suporta a BaseService)
+
+- Cria uma interface chamada "INotificador", mas antes cria uma classe chamada "Notificacao",
+dentro de uma pasta chamada "Notificacoes".
+- Essa interface e classe serve para injeta no BaseService, responsavel por passar as mensagens.
+
+<blockquete>
+
+        public interface INotificador
+        {
+            bool TemNotificacao();
+            List<Notificacao> ObterNotificacoes();
+            void Handle(Notificacao notificacao);
+        }
+ 
+</blockquete>
+
+- A classe Notificacao ela serve para ser instanciada na hora de adicionar uma notificação na classe "BaseService",
+quando for usar o método "Handle", atravez da interface "INotificador" que foi injetada.
+
+<blockquete>
+
+            public class Notificacao
+            {
+                public Notificacao(string mensagem)
+                {
+                    Mensagem = mensagem;
+                }
+                public string Mensagem { get; }
+            }
+
+</blockquete>
+
+- Classe "Notificador" implementa a interface "INotificador".
+
+<blockquete>
+
+            public class Notificador : INotificador
+            {
+                // Uma lista de notificações.
+                private List<Notificacao> _notificacoes;
+                
+                public Notificador()
+                {
+                    // O construtor recebe uma lista de notificações vazio.
+                    _notificacoes = new List<Notificacao>();
+                }
+
+                public void Handle(Notificacao notificacao)
+                {
+                    // Adiciona a notificação na lista. 
+                    _notificacoes.Add(notificacao);
+                }
+
+                public List<Notificacao> ObterNotificacoes()
+                {
+                    // Retorna a lista de notificação.
+                    return _notificacoes;
+                }
+
+                public bool TemNotificacao()
+                {
+                    // Retorna se existe notificações na lista.
+                    return _notificacoes.Any();
+                }
+            }
+ 
+</blockquete>
+
+- Configura a injeção de dependencia do "INotificador", "IFornecedorService", "IProdutoService", 
+no arquivo "DependencyInjectionConfig".
+
+<blockquete>
+
+        services.AddScoped<INotificador, Notificador>();
+        services.AddScoped<IFornecedorService, FornecedorService>();
+        services.AddScoped<IProdutoService, ProdutoService>();
+ 
+</blockquete>
+
+- É preciso injetar no construtor do "FornecedorService" e "ProdutoService" a interface "INotificador",
+e passar para a base!
 -
 -
+<blockquete>
+
+ public FornecedorService(IFornecedorRepository fornecedorRepository,
+                                 IEnderecoRepository enderecoRepository,
+                                 INotificador notificador): base(notificador)
+        {
+            _fornecedorRepository = fornecedorRepository;
+            _enderecoRepository = enderecoRepository;
+        }
+         
+</blockquete>
+
+### Modificando os métodos (adicionar,atualizar,delete) da controler!
+
+- Injeta os serviço no construtor, e modifica os métodos atualizar, adicionar, deletar e alterar endereço.
+
+### Tratando as notificações nos construtores.
+
+- Injeta a interface "INotificador" na classe "BaseController".
+
+<blockquete>
+
+        public class BaseController : Controller
+        {
+            private readonly INotificador _notificador;
+
+            protected BaseController(INotificador notificador)
+            {
+                _notificador = notificador;
+            }
+
+            protected bool OperacaoValida()
+            {
+                return !_notificador.TemNotificacao();
+            }
+        }
+ 
+</blockquete>
+
+- Toda o metodo do controller que tem o serviço, bota o if verificando se tem notificações.
+
+<blockquete>
+
+        if (!OperacaoValida()) return View(produtoViewModel);
+ 
+</blockquete>
+
+- Cria uma component chamada "SummaryViewComponent" na pasta de extensions.
+
+<blockquete>
+
+            public class SummaryViewComponent : ViewComponent
+            {
+                private readonly INotificador _notificador;
+
+                public SummaryViewComponent(INotificador notificador)
+                {
+                    _notificador = notificador;
+                }
+
+                public async Task<IViewComponentResult> InvokeAsync()
+                {
+                    var notificacoes = await Task.FromResult(_notificador.ObterNotificacoes());
+                    notificacoes.ForEach(c => ViewData.ModelState.AddModelError(string.Empty, c.Mensagem));
+
+                    return View();
+                }
+            }
+ 
+</blockquete>
+
+- Essa classe faz com que as notificações apareça na view atravez do "asp-validation-summary", é
+uma taghelper que exibe as notificações, troque o valor para All.
+
+- ModelOnly : Apenas erros da modelState.
+- All: todos os erros.
+
+<blockquete>
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="All" class="text-danger"></div>
+ 
+</blockquete>
+
+- Cria uma pasta chamada "Components" dentro dela uma pasta "Summary" e uma view chamada "Default.cshtml".
+- Essa é a visualização das notificações.
+- Exibe mensagens de erros, sucess e sucess com tempdata
+
+<blockquete>
+
+            @if (ViewData.ModelState.ErrorCount > 0)
+            {
+                <div style="padding-top: 15px;"></div>
+
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    <h3 id="msgRetorno" style="padding-top: 20px">Opa! Algo deu errado :(</h3>
+                    <div style="padding-top: 20px" asp-validation-summary="ModelOnly" class="text-danger"></div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(ViewBag.Sucesso))
+            {
+                <div style="padding-top: 15px"></div>
+
+                <div id="msg_box" class="alert alert-success">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    <h3 id="msgRetorno">@ViewBag.Sucesso</h3>
+                </div>
+            }
+
+            @if (TempData["Sucesso"] != null)
+            {
+                <div style="padding-top: 15px"></div>
+
+                <div id="msg_box" class="alert alert-success">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    <h4 id="msgRetorno">@Html.Raw(TempData["Sucesso"].ToString())</h4>
+                </div>
+            }
+ 
+</blockquete>
+
+- Na view de creat do fornecedor, bota uma taghelper do novo component criad.
+- Ele trata os outros erros!
+
+<blockquete>
+
+        <vc:Summary></vc:Summary>
+
+</blockquete>
+
+- Não importa quantas vezes foi injetado a interface "INotificador" em camadas diferentes, 
+sempre vai ter as mesma mensagem, durante o processamento, porque foi configurado com "AddScoped".
+
+- Nos caso de sucesso, como o de excluir.
+
+<blockquete>
+
+            TempData["Sucesso"] = "Produto excluido com sucesso!";
+
+</blockquete>
 -
 -
 -
 
+<blockquete>
+
+</blockquete>
+-
+-
+-
+
+<blockquete>
+
+</blockquete>
+-
+-
+-
+
+<blockquete>
+
+</blockquete>
+-
+-
+-
+
+<blockquete>
+
+</blockquete>
+-
+-
+-
+
+<blockquete>
+
+</blockquete>
+-
+-
+-
+
+<blockquete>
+
+</blockquete>
+-
+-
+-
+
+<blockquete>
+
+</blockquete>
 
 
 
