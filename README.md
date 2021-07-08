@@ -4258,34 +4258,175 @@ sempre vai ter as mesma mensagem, durante o processamento, porque foi configurad
             TempData["Sucesso"] = "Produto excluido com sucesso!";
 
 </blockquete>
--
--
--
+
+#  Segurança e técnicas inéditas com Identity
+- Cria um usuario, depois cria 2 clans com o id do usuario.
+- Uma claimType de "Produto" e outra de "Fornecedor".
+- As ClaimValue deve ter "Adicionar,Editar,Exluir".
+
+### Configurando as autenticação.
+- Cria um arquivo cs na pasta Extensions, chamada "CustomAuthorization".
+- Essas classe ajuda configurar autenticação.
+- A primeira classe tem o método static "ValidarClaimsUsuario" 
+que valida as claim's do usuario, verifica se ele possui a autorização e as claim's.
+- A classe "ClaimsAuthorizeAttribute" é a declaração de uma tributo que recebe as claimName e claimValue.
+- A classe "RequisitoClaimFilter" verifica se está autenticado, e se tem as claim's esperada.
+
+### configurando os controller
+- Bota o metadado "[Authorize]" em cada controller.
+- Os métodos de index e detalhes bota como "[AllowAnonymous]".
+- Cada método recebe o metadado de "ClaimsAuthorize" correspondido!!
+- exemplo, passa o claimType e claimValue.
+<blockquete>
+
+     [ClaimsAuthorize("Fornecedor", "Editar")]
+
+</blockquete>
+
+### Escondendo funcionabilidade da view com razon.(criando uma tagHelper de uma outra forma)
+- No botão de excluir que fica na lista de fornecedores, aplica os taghelper:
+- Asssim ele nãi exibe caso não tenha o tipo e valor da claim.
+- Precisa também criar umas extenções do taghelper.
 
 <blockquete>
 
+             <a class="btn btn-danger" 
+                   supress-by-claim-name="Fornecedor"
+                   supress-by-claim-value="Excluir"
+                   asp-action="Delete" asp-route-id="@item.Id">
+                <span class="fa fa-trash"></span></a>
+
 </blockquete>
--
--
--
+
+- Na pasta de extensions é criado um arquivo chamado: "ApagaElementoByClaimTagHelper.cs".
+- Nesse arquivo tem 2 classe 
+
+- A primeira é a "ApagaElementoTagHelper", que herda a classe "TagHelper".
+- E acima da classe é definida quais tags ira aceitar essa TagHelper e o nome dela.
+- Cria dois atributos que identifica o nome e valor das claim's.
+- Toda logica fica dentro do método "Process", aonde é processada essa tagHelper.
+- Dentro desse método você deve validar o contexto e o output, caso seja null retorna um "ArgumentNullException".
+- O contexto é oque entra no taghelper, e o output é tudo que sai.
+- O "IHttpContextAccessor" é injetado no método construtor, para poder pegar o contexto, 
+é um meio de acessar o contexto por http(do asp.net core).
+- Usa o método static "ValidarClaimsUsuario" da classe CustomAuthorization, para valida
+as claim's do usuario, verifica se ele possui a autorização e as claim's.
+- Bota o valor do método em uma variavel, se tiver acesso não retorna nada.
+- Caso não tenha não gere a tag usando o comando " output.SuppressOutput();"
 
 <blockquete>
 
+            public override void Process(TagHelperContext context, TagHelperOutput output)
+            {
+                if (context == null)
+                    throw new ArgumentNullException(nameof(context));
+                if (output == null)
+                    throw new ArgumentNullException(nameof(output));
+
+                var temAcesso = CustomAuthorization.ValidarClaimsUsuario(_contextAccessor.HttpContext, IdentityClaimName, IdentityClaimValue);
+
+                if (temAcesso) return;
+
+                output.SuppressOutput();
+            }
+
 </blockquete>
--
--
--
+
+- Foi usado no botão excluir da lista de fornecedores.
+
+### Criaum uma tagHelp que desabilita link
+
+- Cria um arquivo chamado "DesabilitaLinkTagHelper.cs" na pasta extensions.
+- Faz toda configuração dita anteriormente, só que caso ele não tenha a autorização e as claim's pedidas,
+você deve remover tudo que tem no "href" do link e modificar o title e por um style.
 
 <blockquete>
 
+            [HtmlTargetElement("*", Attributes = "disable-by-claim-name")]
+            [HtmlTargetElement("*", Attributes = "disable-by-claim-value")]
+            public class DesabilitaLinkByClaimTagHelper : TagHelper
+            {
+                private readonly IHttpContextAccessor _contextAccessor;
+
+                public DesabilitaLinkByClaimTagHelper(IHttpContextAccessor contextAccessor)
+                {
+                    _contextAccessor = contextAccessor;
+                }
+
+                [HtmlAttributeName("disable-by-claim-name")]
+                public string IdentityClaimName { get; set; }
+
+                [HtmlAttributeName("disable-by-claim-value")]
+                public string IdentityClaimValue { get; set; }
+
+                public override void Process(TagHelperContext context, TagHelperOutput output)
+                {
+                    if (context == null)
+                        throw new ArgumentNullException(nameof(context));
+                    if (output == null)
+                        throw new ArgumentNullException(nameof(output));
+
+                    var temAcesso = CustomAuthorization.ValidarClaimsUsuario(_contextAccessor.HttpContext, IdentityClaimName, IdentityClaimValue);
+
+                    if (temAcesso) return;
+
+                    output.Attributes.RemoveAll("href");
+                    output.Attributes.Add(new TagHelperAttribute("style", "cursor: not-allowed"));
+                    output.Attributes.Add(new TagHelperAttribute("title", "Você não tem permissão"));
+                }
+            }
+
 </blockquete>
--
--
--
+
+- Foi usado no botão editar da lista de fornecedores.
+
+### Escondendo ou mostrando algo, com base na action.
+
+- Com base no nome da ação, quer mostrar ou não alguma coisa.
+- Nesse tratamento de taghelp tem uma unica propriedade chamada "ActionName".
+- Sobre escreve o método "Pross", igual nas outras configurações.
+- Com o "_contextAccessor" você consegue acessar uma coleção de dados da rota, usando o método "GetRouteData()".
+- Com isso você busca a chave "action", assim você pega a action dentro de um request.
+- Caso tenha o valor retorna nada, se não , não gera o elemento.
 
 <blockquete>
 
+            [HtmlTargetElement("*", Attributes = "supress-by-action")]
+            public class ApagaElementoByActionTagHelper : TagHelper
+            {
+                private readonly IHttpContextAccessor _contextAccessor;
+
+                public ApagaElementoByActionTagHelper(IHttpContextAccessor contextAccessor)
+                {
+                    _contextAccessor = contextAccessor;
+                }
+
+                [HtmlAttributeName("supress-by-action")]
+                public string ActionName { get; set; }
+
+                public override void Process(TagHelperContext context, TagHelperOutput output)
+                {
+                    if (context == null)
+                        throw new ArgumentNullException(nameof(context));
+                    if (output == null)
+                        throw new ArgumentNullException(nameof(output));
+
+                    var action = _contextAccessor.HttpContext.GetRouteData().Values["action"].ToString();
+
+                    if (ActionName.Contains(action)) return;
+
+                    output.SuppressOutput();
+                }
+            }
+
 </blockquete>
+
+- Foi usando no botão que atualiza o endenreço, botão que está na partialview "_DetalhesEndereco". 
+- Caso não seja a action "edit" o botão não é exibido.
+
+# Tratamento de erros
+
+
 -
 -
 -
