@@ -4425,7 +4425,137 @@ você deve remover tudo que tem no "href" do link e modificar o title e por um s
 - Caso não seja a action "edit" o botão não é exibido.
 
 # Tratamento de erros
+- Na startUp existe tratamento método que são tratamentos de erros, quando o ambiente é em desenvolvimento.
+- Um bom exemplo é o método " app.UseDeveloperExceptionPage();" quando tem erros de pagina é ativado. 
+- Outro método é o "app.UseDatabaseErrorPage();" que trata o Erros de banco quando falta migration.
 
+### Em produção
+- Se usa o método "UseStatusCodePagesWithRedirects" que trata os erros, sempre manda para uma rota de erro.
+
+<blockquete>
+
+                app.UseExceptionHandler("/Home/Error");
+                app.UseStatusCodePagesWithRedirects("/erro/{0}");           
+
+</blockquete>
+
+- Configurando a action de erro usando o HomeController, para poder personalizar o erro e sua mensagem.
+
+<blockquete>
+
+                [Route("erro/{id:length(3,3)}")]
+                public IActionResult Errors(int id)
+                {
+                    var modelErro = new ErrorViewModel();
+
+                    if (id == 500)
+                    {
+                        modelErro.Mensagem = "Ocorreu um erro! Tente novamente mais tarde ou contate nosso suporte.";
+                        modelErro.Titulo = "Ocorreu um erro!";
+                        modelErro.ErroCode = id;
+                    }
+                    else if (id == 404)
+                    {
+                        modelErro.Mensagem = "A página que está procurando não existe! <br />Em caso de dúvidas entre em contato com nosso suporte";
+                        modelErro.Titulo = "Ops! Página não encontrada.";
+                        modelErro.ErroCode = id;
+                    }
+                    else if (id == 403)
+                    {
+                        modelErro.Mensagem = "Você não tem permissão para fazer isto.";
+                        modelErro.Titulo = "Acesso Negado";
+                        modelErro.ErroCode = id;
+                    }
+                    else
+                    {
+                        return StatusCode(500);
+                    }
+
+                    return View("Error", modelErro);
+                }
+           
+</blockquete>
+
+- Modifica a viewModel para atender o tratamento feito.
+
+<blockquete>
+
+            public class ErrorViewModel
+            {
+                public int ErroCode { get; set; }
+                public string Titulo { get; set; }
+                public string Mensagem { get; set; }
+            }
+
+</blockquete>
+
+- Modifica a viewModel "Error.cshtml" para atender o tratamento feito.
+
+<blockquete>
+
+            @model DevIO.App.ViewModels.ErrorViewModel
+            @{
+                ViewData["Title"] = "Ocorreu um erro";
+            }
+
+            @{
+                if (Model == null)
+                {
+                    <div>
+                        <h2>Ooops! Ocorreu um erro, mas não se preocupe. Nosso time será avisado e iremos corrigir em breve!</h2>
+                    </div>
+                }
+                else
+                {
+                    <h1>@Html.Raw(Model.Titulo)</h1>
+                    <h2 class="text-danger">@Html.Raw(Model.Mensagem)</h2>
+                }
+            }
+
+</blockquete>
+- Pode usar o "KissLog.net " para criar os log de erro, essa etapa ja foi documentada.
+- O exemplo tem filtro de action usando o KissLog.
+
+# Evitando falhas de segurança (HTTPS)
+- É um protocolo http, dentro de um tuneo SSL, que é garantido
+por um certificado, emitido por uma entidade de certificadora valida.
+- Com HTTPS evita as mensagens falando que o seu site não é seguro, e ajuda no rank do google.
+
+- Na StartUp deve ter dois métodos de configuração.
+- A configuração "UseHsts" é apenas no ambiente de produção.
+- Os dois são Middleware!
+- o primeiro adiciona strict transport security no seu HEAD, o hsts é uma implementação de segurança,
+que os browses modernos suportam, ele força conexão seguras.
+- O UseHttpsRedirection ele redireciona para o https.
+
+<blockquete>
+
+        {
+            app.UseHsts();
+        }
+            app.UseHttpsRedirection();
+
+</blockquete>
+
+- Pode fazer essa configuração no Web.config.
+
+- Outro tipo de situação que deve ser tratada para ter maior segurança.
+- Site que tem informações sobre segurança:https://owasp.org/www-community/attacks/csrf
+- Caso uma pessoa com más intenções, copie todo o seu html, 
+e modifica a url, para modificar ou deletar dados.
+- A solução que protege desse perigo é o metadato "[ValidateAntiForgeryToken]" que é colocado 
+no action.
+- Uma outra solução é por o método "Filters" no arquivo de MvcConfig, esse arquivo é chamado na StratUp.
+
+<blockquete>
+
+        o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+
+</blockquete>
+
+- Trabalhando com https e tratando esses ataques já fica bem seguro o site ou sistema.
+
+#  Realizando o deploy no IIS Local
 
 -
 -
@@ -4434,6 +4564,7 @@ você deve remover tudo que tem no "href" do link e modificar o title e por um s
 <blockquete>
 
 </blockquete>
+
 -
 -
 -
@@ -4441,6 +4572,39 @@ você deve remover tudo que tem no "href" do link e modificar o title e por um s
 <blockquete>
 
 </blockquete>
+
+-
+-
+-
+
+<blockquete>
+
+</blockquete>
+
+-
+-
+-
+
+<blockquete>
+
+</blockquete>
+
+-
+-
+-
+
+<blockquete>
+
+</blockquete>
+
+-
+-
+-
+
+<blockquete>
+
+</blockquete>
+
 -
 -
 -

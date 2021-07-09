@@ -68,13 +68,16 @@ namespace DevIO.App
         {
             if (env.IsDevelopment())
             {
+                // Tratamento de erro.
                 app.UseDeveloperExceptionPage();
+                // Tratamento de Erros de banco quando falta migration
                 app.UseDatabaseErrorPage();
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseStatusCodePagesWithRedirects("/erro/{0}");
+
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
