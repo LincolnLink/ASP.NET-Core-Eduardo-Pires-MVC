@@ -1230,7 +1230,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
  
  <blockquete> 
 
-    dotnet ef migrations add "nomeDpMigration" -Context "nome do context" 
+    Add-Migration Initial -Verbose -Context MeuDbContext 
 
  </blockquete>
 
@@ -1252,7 +1252,7 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
  
  <blockquete> 
 
-    dotnet ef database update 
+    Update-Database -Context MeuDbContext
 
  </blockquete>
 
@@ -1263,13 +1263,13 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  <blockquete> 
 
-    dotnet ef migrations add "nomeDpMigration" -Context "nome do context" 
+    Add-Migration Initial -Verbose -Context MeuDbContext 
 
  </blockquete> 
 
  <blockquete> 
 
-    dotnet ef database update 
+    Update-Database -Context MeuDbContext
 
  </blockquete>
 
@@ -1383,13 +1383,13 @@ As partial view são muito ultilizadas também para rederizar dinamicamente part
 
  <blockquete>
 
-    dotnet ef migrations add "Identity"
+    Add-Migration Initial -Verbose -Context MeuDbContext
 
  </blockquete>
  
  <blockquete> 
 
-    dotnet ef database update 
+    Update-Database -Context MeuDbContext
 
  </blockquete>
 
@@ -4557,9 +4557,92 @@ no action.
 
 #  Realizando o deploy no IIS Local
 
--
--
--
+- Video que ensina a ativar o IIS no Windows-10:
+
+https://www.youtube.com/watch?v=BihwoBW1NCM&ab_channel=SICNETTecnologia
+
+- Cria um site novo, cria uma pasta no: C:\inetpub\wwwroot\curso.mvc,
+asocie a porta 80.
+- Em "opções avançadas" tem como ver 
+- Em associações/bind... associa a porta 443. bota o certificado iis express.
+- Link aonde tem a imagem que mostra aonde deve ativar o "Strict-Transport-Security",
+ativa todas as opções.(fica na opção "HSTS" do menu lateral direito.)
+https://security.stackexchange.com/questions/231672/should-i-return-an-hsts-header-for-404-error-pages
+
+
+### Inicia o servidor
+
+- connection
+
+servidor: localhost
+URL: localhost
+Nome do site: curso.mvc
+______________
+
+- Settings
+
+configurações: Release
+
+Target Framework: netcoreapp2.2
+
+Deployment Mode: 
+Framework depent (FrameWork tem que esta instalado)/
+ou fala que aplicação vai junto com o framework(self-contained)
+
+Tempo de Execução de Destino: Portátil.
+
+Opções de publicação de arquivo: desmarcado.
+
+Banco de dados/defaultConnection: marcado.
+
+a parte de magration , não foi recomendada marcar.
+
+### Inicia o site
+
+
+# Rodando a APP em SelfHosting
+
+- Executa o comando do mesmo diretorio do projeto.
+
+- ASP.NET-Core-Eduardo-Pires-MVC\MinhaAppMvcCompleta\src\DevIO.App
+
+<blockquete>
+
+        dotnet run --project DevIO.App.csproj
+
+</blockquete>
+
+- Ele vai aoto hospedar a aplicação, basta ter o runTime.
+- modo selfHosting.
+
+# Realizando o deploy no Azure
+- Na publicação será criada um novo perfil, 
+então cria um novo perfil na opção de publicar.
+- Escolha a opção de app-service.
+- Nesse momento já tem que ter uma conta no azure, asociada ao visual studio.
+- Tem que ter uma assinatura, um resorce group ja desenvolvido ou cria na hora.
+- De um nome para aplicação, escolha assinatura e cria um hostingPlan.
+- Localização, tamanho para quardar sua aplicação(escolha a free).
+- Cria um usuario administrador, databaseName,seta o SQLserver.
+- Pode da erro mas é normal, depois dessa configuração pode fazer o deploy.
+
+- No arquivo appSettings troca a conectstring para a do azure, 
+e executa o update-database -contexto ....
+- Va na configuração do app-service.
+- Na opção application settings verifica a conectonString(dentro do azure).
+- Bota as claims na base de dados manualmente depois de criar um cadastro no sitema.
+- a base de dados é criada no processo de publicação, tem como acessar pelo 
+sql serve manager.
+
+- Uma forma alternativa é usando o profile, 
+no azure baixa o arquivo "Get publish profile", apenas quando ja esta configurado.
+
+- Na hospedagem em nuvem utilizando Azure, qual a forma mais segura de 
+armazenar a sua conexão com o banco de dados?
+- resposta: Utilizar o recurso de AppSettings onde a WebApp procura pela DefaultConnection 
+neste local antes de tentar os arquivos de configuração.
+
+# Declaração final
 
 <blockquete>
 
